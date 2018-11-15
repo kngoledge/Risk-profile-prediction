@@ -45,7 +45,7 @@ def get_unique(column):
 
 ############################################################
 
-def featurizer(inputList, featureVec):
+def featurize(inputList, featureVec):
     """
     Converts string input (sectors or countries or issues) into an
     extracted feature vector, based on the related feature vector.
@@ -65,13 +65,12 @@ def featurizer(inputList, featureVec):
 
 def learnPredictor(trainExamples, countryVec, sectorVec, issueVec):
     '''
-    Given |trainExamples| and |testExamples| (each one is a list of (country, sector, issue)
-    tuples), a |featureExtractor| to apply to x, and the number of iterations to train 
-    |numIters|, the step size |eta|, return the matrix learned.
+    Given |trainExamples| (each element is a list of (country, sector, issue)
+    tuples), the relevant feature vectors, return the matrix learned.
 
     Implements stochastic gradient descent.
     '''
-    numIters = 20
+    numIters = 20   # Can pass this in to constructor later
     eta = 0.01
 
     numTrainers = len(trainExamples)
@@ -95,8 +94,12 @@ def learnPredictor(trainExamples, countryVec, sectorVec, issueVec):
     return weights
 
 ############################################################
+""" 
+    Implements all of our functions. 
+"""
 
 df = prepare_raw_data()
+np.random.shuffle(df)
 countries = get_unique(df['Country'])
 sectors = get_unique(df['Sector/Industry (1)'].append(df['Sector/Industry (2)']))
 issues = get_unique(df['Issue Raised (1)'].append(df['Issue Raised (2)']).append(df['Issue Raised (3)']).append(df['Issue Raised (4)']).append(df['Issue Raised (5)']).append(df['Issue Raised (6)']).append(df['Issue Raised (7)']).append(df['Issue Raised (8)']).append(df['Issue Raised (9)']).append(df['Issue Raised (10)']))
@@ -104,15 +107,24 @@ clean_df = prepare_clean_data(df)
 
 weights = learnPredictor(clean_df[:600], countries, sectors, issues)
 print weights
+predictedOutputs = predictOutput(clean_df[600:], countries, sectors, issues, weights)
+acc = checkAccuracy(predictedOutputs, clean_df[600:][2],issues)
 
-#################################################################
-def testTests(testExamples, countryVec, sectorVec, issueVec, weights):
+
+############################################################
+
+def predictOutput(testExamples, countryVec, sectorVec, issueVec, weights):
+    """ 
+    Given |testExamples| (each element is a list of (country, sector, issue)
+    tuples), the relevant feature vectors, and the weight matrix, returns a
+    vector of the predicted outputs. 
+    """
+
     numTests = len(testExamples)
     numFeatures = len(countryVec) + len(sectorVec)
     numIssues = len(issueVec)
-    weights=np.zeros((numFeatures, numIssues))
-
-    numSuccesses = 0
+    weights= np.zeros((numFeatures, numIssues))
+    y_predicted = []
 
     for j in range(numTests):
 
@@ -120,24 +132,46 @@ def testTests(testExamples, countryVec, sectorVec, issueVec, weights):
         y = featurize(testExamples[j][2], issueVec)
 
         #Check every issue's feature vector in the weights matrix
-        y_predicted = np.matmul(weights, x)
-        guesses = get_max_guess(y_predicted, issueVec)
+        y_predicted[j] = np.matmul(weights, x)
+
+    return y_predicted 
+
+############################################################
+
+def checkAccuracy(y_predicted, y_actual, issueVec):
+    """ 
+    Compares the vector |y_predicted| to the vector |y_actual|, 
+    when using complain data as part of test set. 
+    Returns rough estimate of the % of successful predictions. 
+    """
+    
+    numSuccesses = 0
+    for i in range(len(y_predicted)):
+        predictions = getMaxGuess(y_predicted[i], issueVec)
         count = 0
-        for guess in guesses:
-            if guess in testExamples[j][2]:
+        for prediction in predictions:
+            if prediction in y_actual[i]:
                 count+=1
         print '# of correct guesses = %d out of 3' % count
         if count > 0: numSuccesses+=1
+    return numSuccesses/(len(y_predicted)*3.0) 
 
-    # END_YOUR_CODE
-    return weights 
+############################################################
 
-def get_max_guess(guesses, issueVec):
+def getMaxGuess(guesses, issueVec):
     """
     Converts featurized vector guess into a list of the three
     most probable issues. Returns a list of issues.
     """
-    "word1 = 'NONE'
+    guesses = [] 
+    for x in range(3):
+        index_max = max(xrange(len(guesses)), key=y.__getitem__)
+        guesses.append(issueVec[index_max])
+        del guesses[max_index]
+    return guesses
+
+    """
+    word1 = 'NONE'  # Julea's ugly code
     word2 = 'NONE'
     word3 = 'NONE'
 
@@ -164,13 +198,6 @@ def get_max_guess(guesses, issueVec):
             max3 = guess[i] 
             word3 = issueVec[i]
 
-    return [word1, word2, word3]
-    "
-    guesses = [] 
-    for x in range(3):
-        index_max = max(xrange(len(guesses)), key=y.__getitem__)
-        guesses.append(issueVec[index_max])
-        del guesses[max_index]
-    return guesses
+    return [word1, word2, word3] """
         
 
