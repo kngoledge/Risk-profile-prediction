@@ -88,31 +88,11 @@ def learnPredictor(trainExamples, countryVec, sectorVec, issueVec):
             for k in range(numIssues):
                 residual = (np.dot(x, weights[:,k]) - y[k])**2
 
-<<<<<<< HEAD
-                if regression >1: #IDK what it's supposed to be less than
-=======
                 if residual > 10: #IDK what it's supposed to be less than
->>>>>>> d73f37186522ba16b76d48e814e439b17344fee1
                     weights[:,k] = weights[:,k] + np.multiply(eta*y[k], x)
 
     return weights
 
-############################################################
-""" 
-    Implements all of our functions. 
-"""
-
-df = prepare_raw_data()
-np.random.shuffle(df)
-countries = get_unique(df['Country'])
-sectors = get_unique(df['Sector/Industry (1)'].append(df['Sector/Industry (2)']))
-issues = get_unique(df['Issue Raised (1)'].append(df['Issue Raised (2)']).append(df['Issue Raised (3)']).append(df['Issue Raised (4)']).append(df['Issue Raised (5)']).append(df['Issue Raised (6)']).append(df['Issue Raised (7)']).append(df['Issue Raised (8)']).append(df['Issue Raised (9)']).append(df['Issue Raised (10)']))
-clean_df = prepare_clean_data(df)
-
-weights = learnPredictor(clean_df[:600], countries, sectors, issues)
-print weights
-predictedOutputs = predictOutput(clean_df[600:], countries, sectors, issues, weights)
-acc = checkAccuracy(predictedOutputs, clean_df[600:][2],issues)
 
 
 ############################################################
@@ -132,11 +112,11 @@ def predictOutput(testExamples, countryVec, sectorVec, issueVec, weights):
 
     for j in range(numTests):
 
-        x = featurize(testExamples[j][0], countryVec).append(featurize(testExamples[j][1], sectorVec))
+        x = featurize(testExamples[j][0], countryVec) + featurize(testExamples[j][1], sectorVec)
         y = featurize(testExamples[j][2], issueVec)
 
         #Check every issue's feature vector in the weights matrix
-        y_predicted[j] = np.matmul(weights, x)
+        y_predicted.append((np.matmul(np.asarray(x), weights)).tolist())
 
     return y_predicted 
 
@@ -167,12 +147,28 @@ def getMaxGuess(guesses, issueVec):
     Converts featurized vector guess into a list of the three
     most probable issues. Returns a list of issues.
     """
-    guesses = [] 
+    new_guesses = [] 
     for x in range(3):
-        index_max = max(xrange(len(guesses)), key=y.__getitem__)
+        index_max = max(xrange(len(guesses)), key=guesses.__getitem__)
         guesses.append(issueVec[index_max])
         del guesses[max_index]
     return guesses
         
+############################################################
+""" 
+    Implements all of our functions. 
+"""
+
+df = prepare_raw_data()
+#np.random.shuffle(df)
+countries = get_unique(df['Country'])
+sectors = get_unique(df['Sector/Industry (1)'].append(df['Sector/Industry (2)']))
+issues = get_unique(df['Issue Raised (1)'].append(df['Issue Raised (2)']).append(df['Issue Raised (3)']).append(df['Issue Raised (4)']).append(df['Issue Raised (5)']).append(df['Issue Raised (6)']).append(df['Issue Raised (7)']).append(df['Issue Raised (8)']).append(df['Issue Raised (9)']).append(df['Issue Raised (10)']))
+clean_df = prepare_clean_data(df)
+
+weights = learnPredictor(clean_df[:600], countries, sectors, issues)
+print weights
+predictedOutputs = predictOutput(clean_df[600:], countries, sectors, issues, weights)
+acc = checkAccuracy(predictedOutputs, clean_df[600:][2],issues)
 print('Test')
 testTests(clean_df[600:], countries, sectors, issues, weights)
