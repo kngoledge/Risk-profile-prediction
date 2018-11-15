@@ -45,7 +45,7 @@ def get_unique(column):
 
 ############################################################
 
-def featurize(inputList, featureVec):
+def featurizer(inputList, featureVec):
     """
     Converts string input (sectors or countries or issues) into an
     extracted feature vector, based on the related feature vector.
@@ -104,4 +104,67 @@ clean_df = prepare_clean_data(df)
 
 weights = learnPredictor(clean_df[:600], countries, sectors, issues)
 print weights
+
+#################################################################
+def testTests(testExamples, countryVec, sectorVec, issueVec, weights):
+    numTests = len(testExamples)
+    numFeatures = len(countryVec) + len(sectorVec)
+    numIssues = len(issueVec)
+    weights=np.zeros((numFeatures, numIssues))
+
+    numSuccesses = 0
+
+    for j in range(numTests):
+
+        x = featurize(testExamples[j][0], countryVec).append(featurize(testExamples[j][1], sectorVec))
+        y = featurize(testExamples[j][2], issueVec)
+
+        #Check every issue's feature vector in the weights matrix
+        y_predicted = np.matmul(weights, x)
+        guesses = unfeaturize(y_predicted, issueVec)
+        count = 0
+        for guess in guesses:
+            if guess in testExamples[j][2]:
+                count+=1
+        print '# of correct guesses = %d out of 3' % count
+        if count > 0: numSuccesses+=1
+
+    # END_YOUR_CODE
+    return weights 
+
+def unfeaturize(guess, issueVec):
+    """
+    Converts featurized vector guess into a list of the three
+    most probable issues. Returns a list of issues.
+    """
+    word1 = 'NONE'
+    word2 = 'NONE'
+    word3 = 'NONE'
+
+    max1 = 0
+    max2 = 0
+    max3 = 0
+
+    for i in range(len(guess)):
+        if guess[i]>max1:
+            max3 = max2
+            max2 = max1
+            max1 = guess[i] 
+            word3 = word2
+            word2 = word1
+            word1 = issueVec[i]
+
+        elif guess[i]>max2:
+            max3 = max2
+            max2 = guess[i] 
+            word3 = word2
+            word2 = issueVec[i]
+            
+        elif guess[i]>max3:
+            max3 = guess[i] 
+            word3 = issueVec[i]
+
+    return [word1, word2, word3]
+
+
 
