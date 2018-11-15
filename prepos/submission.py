@@ -45,7 +45,7 @@ def get_unique(column):
 
 ############################################################
 
-def featurizer(inputList, featureVec):
+def featurize(inputList, featureVec):
     """
     Converts string input (sectors or countries or issues) into an
     extracted feature vector, based on the related feature vector.
@@ -89,7 +89,7 @@ def learnPredictor(trainExamples, countryVec, sectorVec, issueVec):
             for k in range(numIssues):
                 regression = (np.dot(x, weights[:,k]) - y[k])**2
 
-                if regression < 10: #IDK what it's supposed to be less than
+                if regression >1: #IDK what it's supposed to be less than
                     weights[:,k] = weights[:,k] + np.multiply(eta*y[k], x)
 
     return weights
@@ -133,39 +133,6 @@ def testTests(testExamples, countryVec, sectorVec, issueVec, weights):
     return weights 
 
 def get_max_guess(guesses, issueVec):
-    """
-    Converts featurized vector guess into a list of the three
-    most probable issues. Returns a list of issues.
-    """
-    "word1 = 'NONE'
-    word2 = 'NONE'
-    word3 = 'NONE'
-
-    max1 = 0
-    max2 = 0
-    max3 = 0
-
-    for i in range(len(guess)):
-        if guess[i]>max1:
-            max3 = max2
-            max2 = max1
-            max1 = guess[i] 
-            word3 = word2
-            word2 = word1
-            word1 = issueVec[i]
-
-        elif guess[i]>max2:
-            max3 = max2
-            max2 = guess[i] 
-            word3 = word2
-            word2 = issueVec[i]
-            
-        elif guess[i]>max3:
-            max3 = guess[i] 
-            word3 = issueVec[i]
-
-    return [word1, word2, word3]
-    "
     guesses = [] 
     for x in range(3):
         index_max = max(xrange(len(guesses)), key=y.__getitem__)
@@ -173,4 +140,5 @@ def get_max_guess(guesses, issueVec):
         del guesses[max_index]
     return guesses
         
-
+print('Test')
+testTests(clean_df[600:], countries, sectors, issues, weights)
