@@ -1,178 +1,108 @@
 #!/usr/bin/python
-
-import random
+import os, random, operator, sys
 import collections
 import math
-import sys
+import pandas as pd
 import numpy as np
-from util import *
 
-############################################################
-# Problem 3: binary classification
-############################################################
-
-############################################################
-# Problem 3a: feature extraction
-
-def extractWordFeatures(x):
+def prepare_raw_data(): 
+    """ 
+        Slice relevant columns for country, sector, and issue
+        and returns master complaint csv for project purposes.
     """
-    Extract word features for a string x. Words are delimited by
-    whitespace characters only.
-    @param string x: 
-    @return dict: feature vector representation of x.
-    Example: "I am what I am" --> {'I': 2, 'am': 2, 'what': 1}
+    df = pd.read_csv('complaints.csv')
+    df = df[['Country', 'Sector/Industry (1)','Sector/Industry (2)',
+         'Issue Raised (1)','Issue Raised (2)', 'Issue Raised (3)', 
+         'Issue Raised (4)','Issue Raised (5)', 'Issue Raised (6)', 
+         'Issue Raised (7)', 'Issue Raised (8)', 'Issue Raised (9)', 
+         'Issue Raised (10)']]
+    return df.fillna('')
+
+def prepare_clean_data(df):
+    """ 
+        Returns a list of tuples, where the tuples are 
+        ([countries], [sectors], [issues]) for every datapoint
     """
-    # BEGIN_YOUR_CODE (our solution is 4 lines of code, but don't worry if you deviate from this)
-    d = {}
-    for w in x.split():
-        if w not in d: 
-            d[w]=0
-        d[w]+=1
-    return d
-    # END_YOUR_CODE
+    clean_data = [] 
+    for index, row in df.iterrows():
+        clean_sectors = filter(None,x['Sector/Industry (1)'].split('|')+x['Sector/Industry (2)'].split('|'))
+        clean_issues = filter(None,x['Issue Raised (1)'].split('|')+x['Issue Raised (2)'].split('|')+x['Issue Raised (3)'].split('|')+x['Issue Raised (4)'].split('|')+x['Issue Raised (5)'].split('|')+x['Issue Raised (6)'].split('|')+x['Issue Raised (7)'].split('|')+x['Issue Raised (8)'].split('|')+x['Issue Raised (9)'].split('|')+x['Issue Raised (10)'].split('|'))
+        clean_tuple = (row['Country'].split('|'), clean_sectors, clean_issues)
+        clean_data.append(clean_tuple)
+    return clean_data 
 
-############################################################
-# Problem 3b: stochastic gradient descent
-
-def learnPredictor(trainExamples, testExamples, featureExtractor, numIters, eta):
-    '''
-    Given |trainExamples| and |testExamples| (each one is a list of (x,y)
-    pairs), a |featureExtractor| to apply to x, and the number of iterations to
-    train |numIters|, the step size |eta|, return the weight vector (sparse
-    feature vector) learned.
-
-    You should implement stochastic gradient descent.
-
-    Note: only use the trainExamples for training!
-    You should call evaluatePredictor() on both trainExamples and testExamples
-    to see how you're doing as you learn after each iteration.
-    '''
-    # BEGIN_YOUR_CODE (our solution is 12 lines of code, but don't worry if you deviate from this)
-    weights={}
-    numTrainers = len(trainExamples)
-    for i in range(numIters):
-        for j in range(numTrainers):
-            featureVector = featureExtractor(trainExamples[j][0])
-            y = trainExamples[j][1]
-            margin = dotProduct(weights, featureVector)*y
-            if margin < 1:
-                increment(weights,eta*y,featureVector)
-    # END_YOUR_CODE
-    return weights
-
-############################################################
-# Problem 3c: generate test case
-
-def generateDataset(numExamples, weights):
-    '''
-    Return a set of examples (phi(x), y) randomly which are classified correctly by
-    |weights|.
-    '''
-    random.seed(42)
-    # Return a single example (phi(x), y).
-    # phi(x) should be a dict whose keys are a subset of the keys in weights
-    # and values can be anything (randomize!) with a nonzero score under the given weight vector.
-    # y should be 1 or -1 as classified by the weight vector.
-    def generateExample():
-        # BEGIN_YOUR_CODE (our solution is 2 lines of code, but don't worry if you deviate from this)
-        phi = {}
-        dicSize = len(weights)
-        for i in xrange(dicSize):
-            # get rand int for index 
-            index = random.randrange(0, dicSize)
-            phi[weights.keys()[index]] = random.randrange(1,20)
-
-        if dotProduct(phi, weights)>=0:
-            y = 1
-        else: 
-            y = -1
-
-        # END_YOUR_CODE
-        return (phi, y)
-    return [generateExample() for _ in range(numExamples)]
-
-############################################################
-# Problem 3e: character features
-
-def extractCharacterFeatures(n):
-    '''
-    Return a function that takes a string |x| and returns a sparse feature
-    vector consisting of all n-grams of |x| without spaces.
-    EXAMPLE: (n = 3) "I like tacos" --> {'Ili': 1, 'lik': 1, 'ike': 1, ...
-    You may assume that n >= 1.
-    '''
-    def extract(x):
-        # BEGIN_YOUR_CODE (our solution is 6 lines of code, but don't worry if you deviate from this)
-        # print x
-        x = x.replace(" ","")        
-        dic = {}
-        for i in range(len(x)-n+1):
-            subword = x[i:i+n]
-            if subword not in dic:
-                dic[subword] = 0
-            dic[subword] += 1
-
-        return dic
-
-        # END_YOUR_CODE
-    return extract
-
-
-############################################################
-		#NEW STUFF
-############################################################
-
-
-############################################################
-
-def featurize(sector, country, sectorVec, countryVec):
+def get_unique(column): 
+    """ 
+        Given a column from the master complaints df,
+        return a list of its unique values
     """
-    Converts string inputs (sector and country) into an
-    extracted feature vector, based on the related feature vectors.
+    u_column = []
+    for x in column: 
+        if x == x:
+            for y in x.replace('Unknown', 'Other').replace('Extractives (oil, gas, mining)', 'Extractives (oil/gas/mining)').replace(', ', ',').split(','): 
+                u_column.append(y)
+    return list(set(u_column))
+
+############################################################
+
+def featurize(inputList, featureVec):
+    """
+    Converts string input (sectors or countries or issues) into an
+    extracted feature vector, based on the related feature vector.
     Outputs a sparse feature vector that is the concatenation of
     the sector feature vec followed by the country feature vec. 
     """
-    
-    newVec = np.zeros(len(sectorVec)+len(countryVec))
+    newVec = np.zeros(len(featureVec))
 
-    for i in range(len(sectorVec)):
-        if sector == sectorVec[i]: 
-            newVec[i] += 1
-	for j in range(len(countryVec)):
-		if country == countryVec[j]:
-			newVec[j+len(sectorVec)] += 1
+    for i in range(len(featureVec)):
+        for s in inputList:
+            if s == featureVec[i]: 
+                newVec[i] += 1
 
     return newVec
 
 ############################################################
-# New Code
 
-def learnPredictor(countryVec, sectorVec, issueVec, numIters, eta):
+def learnPredictor(trainExamples, testExamples, countryVec, sectorVec, issueVec):
     '''
-    Given |trainExamples| and |testExamples| (each one is a list of (x,y)
-    pairs), a |featureExtractor| to apply to x, and the number of iterations to
-    train |numIters|, the step size |eta|, return the weight vector (sparse
-    feature vector) learned.
+    Given |trainExamples| and |testExamples| (each one is a list of (country, sector, issue)
+    tuples), a |featureExtractor| to apply to x, and the number of iterations to train 
+    |numIters|, the step size |eta|, return the matrix learned.
 
-    You should implement stochastic gradient descent.
-
-    Note: only use the trainExamples for training!
-    You should call evaluatePredictor() on both trainExamples and testExamples
-    to see how you're doing as you learn after each iteration.
+    Implements stochastic gradient descent.
     '''
-    # BEGIN_YOUR_CODE (our solution is 12 lines of code, but don't worry if you deviate from this)
-    weights={}
+    numIters = 20
+    eta = 0.01
+
     numTrainers = len(trainExamples)
+    numFeatures = len(countryVec) + len(sectorVec)
+    numIssues = len(issueVec)
+    weights=np.zeros((numFeatures, numIssues))
+
     for i in range(numIters):
         for j in range(numTrainers):
-            featureVector = featureExtractor(trainExamples[j][0])
-            y = trainExamples[j][1]
-            margin = dotProduct(weights, featureVector)*y
-            if margin < 1:
-                increment(weights,eta*y,featureVector)
+
+            x = featurizer(trainExamples[j][0], countryVec).append(featurizer(trainExamples[j][1], sectorVec))
+            y = featurizer(trainExamples[j][2])
+
+            #Check every issue's feature vector in the weights matrix
+            for k in range(numIssues):  
+                regression = (np.dot(x, weights[:,k]) - y[k])**2
+
+                if regression < 1: #IDK what it's supposed to be less than
+                    weights[:,k] = weights[:,k] + x[k]*eta*y
+
     # END_YOUR_CODE
     return weights
 
 ############################################################
 
+df = prepare_data()
+countries = get_unique(df['Country'])
+sectors = get_unique(df['Sector/Industry (1)'].append(df['Sector/Industry (2)']))
+issues = get_unique(df['Issue Raised (1)'].append(df['Issue Raised (2)']).append(df['Issue Raised (3)']).append(df['Issue Raised (4)']).append(df['Issue Raised (5)']).append(df['Issue Raised (6)']).append(df['Issue Raised (7)']).append(df['Issue Raised (8)']).append(df['Issue Raised (9)']).append(df['Issue Raised (10)']))
+clean_df = prepare_clean_data(df)
+
+weights = learnPredictor(clean_df[:600], clean_df[600:], countries, sectors, issues)
+print weights
 
