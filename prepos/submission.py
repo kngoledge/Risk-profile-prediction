@@ -86,9 +86,9 @@ def learnPredictor(trainExamples, countryVec, sectorVec, issueVec):
 
             #Check every issue's feature vector in the weights matrix
             for k in range(numIssues):
-                regression = (np.dot(x, weights[:,k]) - y[k])**2
+                residual = (np.dot(x, weights[:,k]) - y[k])**2
 
-                if regression < 10: #IDK what it's supposed to be less than
+                if residual > 10: #IDK what it's supposed to be less than
                     weights[:,k] = weights[:,k] + np.multiply(eta*y[k], x)
 
     return weights
