@@ -24,10 +24,10 @@ def prepare_clean_data(df):
         ([countries], [sectors], [issues]) for every datapoint
     """
     clean_data = [] 
-    for index, row in df.iterrows():
+    for index, x in df.iterrows():
         clean_sectors = filter(None,x['Sector/Industry (1)'].split('|')+x['Sector/Industry (2)'].split('|'))
         clean_issues = filter(None,x['Issue Raised (1)'].split('|')+x['Issue Raised (2)'].split('|')+x['Issue Raised (3)'].split('|')+x['Issue Raised (4)'].split('|')+x['Issue Raised (5)'].split('|')+x['Issue Raised (6)'].split('|')+x['Issue Raised (7)'].split('|')+x['Issue Raised (8)'].split('|')+x['Issue Raised (9)'].split('|')+x['Issue Raised (10)'].split('|'))
-        clean_tuple = (row['Country'].split('|'), clean_sectors, clean_issues)
+        clean_tuple = (x['Country'].split('|'), clean_sectors, clean_issues)
         clean_data.append(clean_tuple)
     return clean_data 
 
@@ -59,11 +59,11 @@ def featurize(inputList, featureVec):
             if s == featureVec[i]: 
                 newVec[i] += 1
 
-    return newVec
+    return newVec.tolist()
 
 ############################################################
 
-def learnPredictor(trainExamples, testExamples, countryVec, sectorVec, issueVec):
+def learnPredictor(trainExamples, countryVec, sectorVec, issueVec):
     '''
     Given |trainExamples| and |testExamples| (each one is a list of (country, sector, issue)
     tuples), a |featureExtractor| to apply to x, and the number of iterations to train 
@@ -82,27 +82,26 @@ def learnPredictor(trainExamples, testExamples, countryVec, sectorVec, issueVec)
     for i in range(numIters):
         for j in range(numTrainers):
 
-            x = featurizer(trainExamples[j][0], countryVec).append(featurizer(trainExamples[j][1], sectorVec))
-            y = featurizer(trainExamples[j][2])
+            x = featurize(trainExamples[j][0], countryVec)+featurize(trainExamples[j][1], sectorVec)
+            y = featurize(trainExamples[j][2], issueVec)
 
             #Check every issue's feature vector in the weights matrix
-            for k in range(numIssues):  
+            for k in range(numIssues):
                 regression = (np.dot(x, weights[:,k]) - y[k])**2
 
-                if regression < 1: #IDK what it's supposed to be less than
-                    weights[:,k] = weights[:,k] + x[k]*eta*y
+                if regression < 10: #IDK what it's supposed to be less than
+                    weights[:,k] = weights[:,k] + np.multiply(eta*y[k], x)
 
-    # END_YOUR_CODE
     return weights
 
 ############################################################
 
-df = prepare_data()
+df = prepare_raw_data()
 countries = get_unique(df['Country'])
 sectors = get_unique(df['Sector/Industry (1)'].append(df['Sector/Industry (2)']))
 issues = get_unique(df['Issue Raised (1)'].append(df['Issue Raised (2)']).append(df['Issue Raised (3)']).append(df['Issue Raised (4)']).append(df['Issue Raised (5)']).append(df['Issue Raised (6)']).append(df['Issue Raised (7)']).append(df['Issue Raised (8)']).append(df['Issue Raised (9)']).append(df['Issue Raised (10)']))
 clean_df = prepare_clean_data(df)
 
-weights = learnPredictor(clean_df[:600], clean_df[600:], countries, sectors, issues)
+weights = learnPredictor(clean_df[:600], countries, sectors, issues)
 print weights
 
