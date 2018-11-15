@@ -121,7 +121,7 @@ def testTests(testExamples, countryVec, sectorVec, issueVec, weights):
 
         #Check every issue's feature vector in the weights matrix
         y_predicted = np.matmul(weights, x)
-        guesses = unfeaturize(y_predicted, issueVec)
+        guesses = get_max_guess(y_predicted, issueVec)
         count = 0
         for guess in guesses:
             if guess in testExamples[j][2]:
@@ -132,12 +132,12 @@ def testTests(testExamples, countryVec, sectorVec, issueVec, weights):
     # END_YOUR_CODE
     return weights 
 
-def unfeaturize(guess, issueVec):
+def get_max_guess(guesses, issueVec):
     """
     Converts featurized vector guess into a list of the three
     most probable issues. Returns a list of issues.
     """
-    word1 = 'NONE'
+    "word1 = 'NONE'
     word2 = 'NONE'
     word3 = 'NONE'
 
@@ -165,6 +165,12 @@ def unfeaturize(guess, issueVec):
             word3 = issueVec[i]
 
     return [word1, word2, word3]
-
-
+    "
+    guesses = [] 
+    for x in range(3):
+        index_max = max(xrange(len(guesses)), key=y.__getitem__)
+        guesses.append(issueVec[index_max])
+        del guesses[max_index]
+    return guesses
+        
 
