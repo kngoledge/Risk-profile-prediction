@@ -64,8 +64,9 @@ def featurize(inputList, featureVec):
     return newVec.tolist()
 
 ############################################################
-
 # Clean the dataset 
+############################################################
+
 df = prepare_raw_data()
 countries = get_unique(df['Country'])
 sectors = get_unique(df['Sector/Industry (1)'].append(df['Sector/Industry (2)']))
@@ -76,43 +77,43 @@ clean_df = prepare_clean_data(df)
 
 xtrain = []
 ytrain = []
-
-numTrainers = 600
+numTrainers = 600       #change to 600
 trainExamples = clean_df[:numTrainers]
 for i in range(numTrainers):
     x = featurize(trainExamples[i][0], countries)+featurize(trainExamples[i][1], sectors)
     y = featurize(trainExamples[i][2], issues)
     xtrain.append(x)
     ytrain.append(y)
+xtrain = np.asarray(xtrain)
+ytrain = np.asarray(ytrain)
+print("shape of x_train: ", xtrain.shape)
+print("y train: ", ytrain.shape)
 
 xtest = []
 ytest = []
 testExamples = clean_df[numTrainers:]
-for i in range(len(testExamples)):
+numTesters = len(testExamples)      #change to len(testExamples)
+for i in range(numTesters):
     x = featurize(trainExamples[i][0], countries)+featurize(trainExamples[i][1], sectors)
     y = featurize(trainExamples[i][2], issues)
     xtest.append(x)
     ytest.append(y)
+xtest = np.asarray(xtest)
+ytest = np.asarray(ytest)
 
 # Parameters
 featureVec_size = len(countries) + len(sectors) 
 final_dim = len(issues)
+batch_sz = len(trainExamples)
 
-print "len1: "
-print featureVec_size
-print "len2: "
-print len(trainExamples)
-print "len3: "
-print len(xtrain[2])
-print xtrain[2]
-
-
+############################################################
 # Create the model
+############################################################
+
 model = Sequential()
-model.add(Dense(64, activation='relu', input_shape=(featureVec_size,)))
+model.add(Dense(64, activation='relu', input_shape=(featureVec_size,) ))
 model.add(Dense(64, activation='relu'))
 model.add(Dense(final_dim, activation='softmax'))
-
 
 model.summary()
 
@@ -123,13 +124,13 @@ model.compile(loss='categorical_crossentropy',
               optimizer=sgd,
               metrics=['accuracy'])
 
-history = model.fit(xtrain, ytrain, epochs=20, batch_size=100)
+history = model.fit(xtrain, ytrain, epochs=50, batch_size=batch_sz)
 
-score = model.evaluate(xtest, ytest, batch_size=100)
+score = model.evaluate(xtest, ytest, batch_size=batch_sz)
 
 print "compiled!"
-#print('Test loss:', score[0])
-#print('Test accuracy:', score[1])
+print('Test loss:', score[0])
+print('Test accuracy:', score[1])
 
 
 
