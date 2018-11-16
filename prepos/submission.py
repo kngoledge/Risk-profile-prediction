@@ -149,10 +149,11 @@ def getMaxGuess(guesses, issueVec):
     """
     new_guesses = [] 
     for x in range(3):
-        index_max = max(xrange(len(guesses)), key=guesses.__getitem__)
-        guesses.append(issueVec[index_max])
+        max_index= max(xrange(len(guesses)), key=guesses.__getitem__)
+        new_guesses.append(issueVec[max_index])
         del guesses[max_index]
-    return guesses
+    print new_guesses
+    return new_guesses
         
 ############################################################
 """ 
@@ -165,6 +166,18 @@ countries = get_unique(df['Country'])
 sectors = get_unique(df['Sector/Industry (1)'].append(df['Sector/Industry (2)']))
 issues = get_unique(df['Issue Raised (1)'].append(df['Issue Raised (2)']).append(df['Issue Raised (3)']).append(df['Issue Raised (4)']).append(df['Issue Raised (5)']).append(df['Issue Raised (6)']).append(df['Issue Raised (7)']).append(df['Issue Raised (8)']).append(df['Issue Raised (9)']).append(df['Issue Raised (10)']))
 clean_df = prepare_clean_data(df)
+
+print "COUNTRY"
+print countries
+print len(countries)
+print "SECTOR"
+sectors.pop(0)
+print sectors
+print len(sectors)
+print "ISSUE"
+issues.pop(0)
+print issues
+print len(issues)
 
 weights = learnPredictor(clean_df[:600], countries, sectors, issues)
 print weights
