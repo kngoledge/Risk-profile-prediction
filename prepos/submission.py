@@ -150,9 +150,9 @@ def getMaxGuess(guesses, issueVec):
     new_guesses = [] 
     for x in range(3):
         index_max = max(xrange(len(guesses)), key=guesses.__getitem__)
-        guesses.append(issueVec[index_max])
-        del guesses[max_index]
-    return guesses
+        new_guesses.append(issueVec[index_max])
+        del guesses[index_max]
+    return new_guesses
         
 ############################################################
 """ 
