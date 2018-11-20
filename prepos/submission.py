@@ -166,6 +166,18 @@ sectors = get_unique(df['Sector/Industry (1)'].append(df['Sector/Industry (2)'])
 issues = get_unique(df['Issue Raised (1)'].append(df['Issue Raised (2)']).append(df['Issue Raised (3)']).append(df['Issue Raised (4)']).append(df['Issue Raised (5)']).append(df['Issue Raised (6)']).append(df['Issue Raised (7)']).append(df['Issue Raised (8)']).append(df['Issue Raised (9)']).append(df['Issue Raised (10)']))
 clean_df = prepare_clean_data(df)
 
+print "COUNTRY"
+print countries
+print len(countries)
+print "SECTOR"
+sectors.pop(0)
+print sectors
+print len(sectors)
+print "ISSUE"
+issues.pop(0)
+print issues
+print len(issues)
+
 weights = learnPredictor(clean_df[:600], countries, sectors, issues)
 print weights
 predictedOutputs = predictOutput(clean_df[600:], countries, sectors, issues, weights)
