@@ -6,6 +6,7 @@ import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense, Activation, Dropout
 from keras.optimizers import SGD
+import keras.backend as K
 
 def prepare_raw_data(): 
     """ 
@@ -63,6 +64,14 @@ def featurize(inputList, featureVec):
 
     return newVec.tolist()
 
+def calc_acc(y_true, y_pred):
+    numIssues = np.sum(y_true)
+    count = 0.0
+    for i in len(y_true):
+        if y_true[i] == 1 and y_pred[i] > 0.5: count+=1.0
+
+    return count/numIssues
+
 ############################################################
 # Clean the dataset 
 ############################################################
@@ -104,14 +113,20 @@ ytest = np.asarray(ytest)
 # Parameters
 featureVec_size = len(countries) + len(sectors) 
 final_dim = len(issues)
-batch_sz = len(trainExamples)
+batch_sz = 100
+
+print ("Feature Vect Size: ", featureVec_size)
+print ("Issues: ", final_dim)
+print ("Num Countries: ", len(countries))
+print countries
+print sectors
+print issues
 
 ############################################################
+
 # Create the model
-############################################################
-
 model = Sequential()
-model.add(Dense(64, activation='relu', input_shape=(featureVec_size,) ))
+model.add(Dense(100, activation='relu', input_shape=(featureVec_size,) ))
 model.add(Dense(64, activation='relu'))
 model.add(Dense(final_dim, activation='softmax'))
 
@@ -126,6 +141,7 @@ model.compile(loss='categorical_crossentropy',
 
 history = model.fit(xtrain, ytrain, epochs=50, batch_size=batch_sz)
 
+# Time to test!
 score = model.evaluate(xtest, ytest, batch_size=batch_sz)
 
 print "compiled!"
