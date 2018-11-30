@@ -23,14 +23,14 @@ batch_sz = 100
 model = Sequential()
 model.add(Dense(100, activation='relu', input_shape=(featureVec_size,) ))
 model.add(Dense(64, activation='relu'))
-model.add(Dense(final_dim, activation='softmax'))
+model.add(Dense(final_dim, activation='sigmoid'))
 
 model.summary()
 
 # Stochastic Gradient Descent
 sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
 
-model.compile(loss='categorical_crossentropy',
+model.compile(loss='binary_crossentropy',
               optimizer=sgd,
               metrics=['accuracy'])
 
