@@ -8,21 +8,41 @@ from keras.layers import Dense, Activation, Dropout
 from keras.optimizers import SGD
 import keras.backend as K
 import util
+from sklearn.metrics import precision_recall_curve
+from sklearn.metrics import average_precision_score
+import matplotlib.pyplot as plt
+
+
+# first, add threshold to calculate 0/1 values
+def change_by_threshold(threshold, values_vector):
+  new_values_vector = [] 
+  for x in values_vector:
+    actual = [] 
+    for y in x: 
+      y = 1 if y > threshold else 0 
+      actual.append(y)
+    new_values_vector.append(actual)
+  return new_values_vector
 
 
 ############################################################
 
 # Parameters
-numTrainers = 5000
-xtrain, ytrain, xtest, ytest, numRegions, numSectors, numIssues = util.organize_data(numTrainers)
+numTrainers = 5000	# DECIDE SPLIT BETWEEN TRAINING AND TEST
+xlist, ylist, numRegions, numSectors, numIssues = util.organize_data()
 featureVec_size = numRegions + numSectors
 final_dim = numIssues
 batch_sz = 256
 
+xtrain = np.array( xlist[:numTrainers] )
+ytrain = np.array( ylist[:numTrainers] )
+xtest = np.array( xlist[numTrainers:] )
+ytest = np.array( ylist[numTrainers:] )
+
 # Create the model
 model = Sequential()
 model.add(Dense(64, activation='relu', input_shape=(featureVec_size,) ))	#small dataset - less hidden layers needed
-model.add(Dense(40, activation='relu'))
+model.add(Dense(50, activation='relu'))
 model.add(Dense(final_dim, activation='sigmoid'))
 
 model.summary()
@@ -38,6 +58,28 @@ history = model.fit(xtrain, ytrain, epochs=200, batch_size=batch_sz)
 
 # Time to test!
 score = model.evaluate(xtest, ytest, batch_size=batch_sz)
+#ypred = model.prediction(xtest)
+
+"""
+# For each class
+precision = dict()
+recall = dict()
+average_precision = dict()
+for i in range(23):
+    precision[i], recall[i], _ = precision_recall_curve(ytest[:, i],
+                                                        ypred[:, i])
+    average_precision[i] = average_precision_score(ytest[:, i], ypred[:, i])
+
+# A "micro-average": quantifying score on all classes jointly
+precision["micro"], recall["micro"], _ = precision_recall_curve(ytest.ravel(),
+    ypred.ravel())
+average_precision["micro"] = average_precision_score(ytest, ypred,
+                                                     average="micro")
+print('Average precision score, micro-averaged over all classes: {0:0.2f}'
+      .format(average_precision["micro"]))
+
+## TO DO: get an average for micro recall 
+"""
 
 print "\nCompiled! Here are your results..."
 print('Test loss:', score[0])

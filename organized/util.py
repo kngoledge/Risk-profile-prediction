@@ -47,12 +47,12 @@ def prepare_clean_WB_project_data(df):
 
 
 
-def prepare_raw_complaint_data(filename): 
+def prepare_raw_complaint_data(): 
         """ 
                 Slice relevant columns for country, sector, and issue
                 and returns master complaint csv for project purposes.
         """
-        df = pd.read_csv(filename)
+        df = pd.read_csv('complaints.csv')
         df = df[['Country', 'Sector/Industry (1)','Sector/Industry (2)',
                  'Issue Raised (1)','Issue Raised (2)', 'Issue Raised (3)', 
                  'Issue Raised (4)','Issue Raised (5)', 'Issue Raised (6)', 
@@ -262,7 +262,7 @@ def featurize_issue(inputList, featureVec):
 
 ############################################################
 
-def organize_data(numTrainers):
+def organize_data():
 	"""
 	Converts a list of string inputs (countries) into an
 	extracted feature vector (based on regions).
@@ -301,37 +301,21 @@ def organize_data(numTrainers):
 	print('Length of unique WB data: ', len(unique_WB_data) )
 	print('Length of total dataset: ', len(total_dataset) )
 
-	## Training Data
-	xtrain = []
-	ytrain = []
-	trainExamples = total_dataset[:numTrainers]
-	for i in range(numTrainers):
+	## Convert data
+	xlist = []
+	ylist = []
+	trainExamples = total_dataset
+	for i in range(len(total_dataset)):
 		x = featurize_complex(trainExamples[i][0], regions, regionDict)+featurize_complex(trainExamples[i][1], sectors, sectorDict)
 		#x = featurize_complex(trainExamples[i][0], regions, regionDict)+featurize(trainExamples[i][1], sectors)
 		y = featurize_issue(trainExamples[i][2], issues)
 		#y = featurize_issue(trainExamples[i][2], issueGroups)	# DELETE LATER IF FAIL
-		xtrain.append(x)
-		ytrain.append(y)
-	xtrain = np.asarray(xtrain)
-	ytrain = np.asarray(ytrain)
+		xlist.append(x)
+		ylist.append(y)
 
+	return xlist, ylist, numRegions, numSectors, numIssues
 
-	## Testing Data
-	xtest = []
-	ytest = []
-	testExamples = total_dataset[numTrainers:]
-	numTesters = len(testExamples)      #change to len(testExamples)
-	for i in range(numTesters):
-		x = featurize_complex(testExamples[i][0], regions, regionDict)+featurize_complex(testExamples[i][1], sectors, sectorDict)
-		y = featurize_issue(testExamples[i][2], issues)
-		#y = featurize_issue(testExamples[i][2], issueGroups)	# DELETE LATER IF FAIL
-		xtest.append(x)
-		ytest.append(y)
-	xtest = np.asarray(xtest)
-	ytest = np.asarray(ytest)
-
-	return xtrain, ytrain, xtest, ytest, numRegions, numSectors, numIssues
-	#return xtrain, ytrain, xtest, ytest, numRegions, numSectors, numGroups
+	#return xlist, ylist, numRegions, numSectors, numGroups
 
 
 
