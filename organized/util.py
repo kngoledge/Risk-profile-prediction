@@ -80,6 +80,10 @@ def get_unique(column):
 				u_column.append(y)
 	return list(set(u_column))
 
+def get_project_names(): 
+    ac = pd.read_csv('2016_17_complaints.csv')
+    return list(set(filter(None, list(ac['Project Name'].fillna('')))))
+
 """
 	proj_names is list of project names from COMPLAINTS
 	wb_data is list of tuples where each element is tuple of (project name, [countries], [sectors])
@@ -87,13 +91,16 @@ def get_unique(column):
 """
 def remove_duplicate_projects(proj_names, wb_data):
 	unmatched_data = []
-	for name in proj_names:
+
+	for tup in wb_data:
 		match = False
-		for i, tup in enumerate(wb_data):
-			if tup[0] == name:
+		for name in proj_names:
+			if tup[0] in name:
+			#if tup[0] == name:
 				match = True
 				break
 		if match == False: unmatched_data.append(tup)
+
 	return unmatched_data
 
 
@@ -104,15 +111,18 @@ def remove_duplicate_projects(proj_names, wb_data):
 """
 def combine_datasets(complaint_data, WB_data, numIssues):
 	
-	for i in range(len(WB_data)):
+	for a, b, c in WB_data:
 		noIssues = np.zeros(numIssues)
-		noIssues[-1] = 1                # mark NONE as true
-		complaint_data.append( (WB_data[i][1],WB_data[2],noIssues) )
+		noIssues[-1] = 1  
+		complaint_data.append( (b, c, noIssues) )
 
-	complaint_array = np.asarray(complaint_data)		# PLS FIX THIS
-	np.random.shuffle(complaint_array)
+	# for i in range(len(WB_data)):
+	# 	noIssues = np.zeros(numIssues)
+	# 	noIssues[-1] = 1                # mark NONE as true
+	# 	complaint_data.append( (WB_data[i][1], WB_data[i][2], noIssues) )
 
-	return list(complaint_array)
+	random.shuffle(complaint_data)
+	return complaint_data
 
 ############################################################
 ##  Related to featurization
@@ -168,6 +178,8 @@ def featurize_complex(inputList, featureVec, dictionary):
 	extracted feature vector (based on regions or standard sectors).
 	Outputs a sparse feature vector (of regions or standard sectors).
 	"""
+	#print "SUCCESSFUL COMPLEX FEATURIZER"
+	#print("\nInput List: ", inputList)
 	newVec = np.zeros(len(featureVec))
 
 	for s in inputList:
@@ -179,6 +191,7 @@ def featurize_complex(inputList, featureVec, dictionary):
 	return newVec.tolist()
 
 def featurize_issue(inputList, featureVec):
+	#print "SUCCESSFUL issue featurizer"
 	"""
 	Converts a list of string inputs (issues) into an extracted 
 	feature vector, based on the related feature vector.
@@ -281,8 +294,13 @@ def organize_data(numTrainers):
 	complaint_clean_df = prepare_clean_complaint_data(complaint_df)
 	WB_df = prepare_raw_WB_project_data()
 	WB_clean_df = prepare_clean_WB_project_data(WB_df)
-	unique_WB_data = remove_duplicate_projects(complaint_clean_df, WB_clean_df)
+	unique_WB_data = remove_duplicate_projects(get_project_names(), WB_clean_df)
 	total_dataset = combine_datasets(complaint_clean_df, unique_WB_data, numIssues)
+
+	print('Length of raw complaint: ', len(complaint_df) )
+	print('Length of raw WB data: ', len(WB_df) )
+	print('Length of unique WB data: ', len(unique_WB_data) )
+	print('Length of total dataset: ', len(total_dataset) )
 
 	## Training Data
 	xtrain = []
