@@ -30,7 +30,7 @@ def clean_sector_string(sector_string):
 def prepare_clean_WB_project_data(df):
     """
             Returns a list of tuples, where the tuples are
-            ([countries], [sectors], [issues]) for every datapoint
+            (project_name, [countries], [sectors]) for every datapoint
     """
     clean_data = []
     for index, x in df.iterrows():
