@@ -84,12 +84,12 @@ def get_project_names():
     ac = pd.read_csv('2016_17_complaints.csv')
     return list(set(filter(None, list(ac['Project Name'].fillna('')))))
 
-"""
-	proj_names is list of project names from COMPLAINTS
-	wb_data is list of tuples where each element is tuple of (project name, [countries], [sectors])
-	updates wb_data to remove instances of matching project names
-"""
 def remove_duplicate_projects(proj_names, wb_data):
+	"""
+		proj_names is list of project names from COMPLAINTS
+		wb_data is list of tuples where each element is tuple of (project name, [countries], [sectors])
+		updates wb_data to remove instances of matching project names
+	"""
 	unmatched_data = []
 
 	for tup in wb_data:
@@ -103,25 +103,18 @@ def remove_duplicate_projects(proj_names, wb_data):
 
 	return unmatched_data
 
-
-"""
-	Returns a shuffled combo of complaint_data and WB_data
-	Complaint Data: list of ([countries], [sectors], [issues]) tuples
-	WB Data:        list of (proj name, [countries], [sectors]) tuples
-"""
 def combine_datasets(complaint_data, WB_data, numIssues):
-	
+	"""
+		Returns a shuffled combo of complaint_data and unique WB_data
+		Complaint Data: list of ([countries], [sectors], [issues]) tuples
+		WB Data:        list of (proj name, [countries], [sectors]) tuples
+	"""	
+	#print('orig 0:', complaint_data[0], 'orig 20:', complaint_data[20], 'orig 600:', complaint_data[600])
 	for a, b, c in WB_data:
-		noIssues = np.zeros(numIssues)
-		noIssues[-1] = 1  
-		complaint_data.append( (b, c, noIssues) )
-
-	# for i in range(len(WB_data)):
-	# 	noIssues = np.zeros(numIssues)
-	# 	noIssues[-1] = 1                # mark NONE as true
-	# 	complaint_data.append( (WB_data[i][1], WB_data[i][2], noIssues) )
-
+		complaint_data.append( (b, c, ['NONE']) )
 	random.shuffle(complaint_data)
+	#print('new 0:', complaint_data[0], 'new 20:', complaint_data[20], 'new 600:', complaint_data[600])
+
 	return complaint_data
 
 ############################################################
@@ -191,7 +184,6 @@ def featurize_complex(inputList, featureVec, dictionary):
 	return newVec.tolist()
 
 def featurize_issue(inputList, featureVec):
-	#print "SUCCESSFUL issue featurizer"
 	"""
 	Converts a list of string inputs (issues) into an extracted 
 	feature vector, based on the related feature vector.
@@ -273,7 +265,7 @@ def organize_data(numTrainers):
 	regions, regionDict = build_dict('countrylist.csv')
 	sectors, sectorDict = build_dict('sectorlist.csv')
 	#sectors = ['Agribusiness', 'Infrastructure', 'Conservation and environmental protection', 'Energy', 'Healthcare', 'Manufacturing', 'Community capacity and development', 'Forestry', 'Chemicals', 'Other', 'Regulatory Development', 'Land reform', 'Education', 'Extractives (oil/gas/mining)']
-	issues = ['Other retaliation (actual or feared)', 'Livelihoods', 'Labor', 'Consultation and disclosure', 'Property damage', 'Other', 'Indigenous peoples', 'Cultural heritage', 'Personnel issues', 'Water', 'Other gender-related issues', 'Biodiversity', 'Procurement', 'Gender-based violence', 'Other community health and safety issues', 'Pollution', 'Human rights', "Violence against the community (by gov't and/or company)", 'Due diligence', 'Displacement (physical and/or economic)', 'Other environmental', 'Corruption/fraud', 'NONE']
+	issues = ['Biodiversity', 'Consultation and disclosure', 'Corruption/fraud', 'Cultural heritage', 'Displacement (physical and/or economic)', 'Due diligence', 'Gender-based violence', 'Human rights', 'Indigenous peoples', 'Labor', 'Livelihoods', 'Other', 'Other community health and safety issues', 'Other environmental', 'Other gender-related issues', 'Other retaliation (actual or feared)', 'Personnel issues', 'Pollution', 'Procurement', 'Property damage', 'Unknown', "Violence against the community (by gov't and/or company)", 'Water', 'NONE']
 	# add no issues to feature vector: will have to create a specialized featurize function
 
 
@@ -315,6 +307,7 @@ def organize_data(numTrainers):
 		ytrain.append(y)
 	xtrain = np.asarray(xtrain)
 	ytrain = np.asarray(ytrain)
+
 
 	## Testing Data
 	xtest = []
