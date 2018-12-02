@@ -17,12 +17,12 @@ numTrainers = 600
 xtrain, ytrain, xtest, ytest, numRegions, numSectors, numIssues = util.organize_data('complaints.csv', numTrainers)
 featureVec_size = numRegions + numSectors
 final_dim = numIssues
-batch_sz = 100
+batch_sz = 64
 
 # Create the model
 model = Sequential()
 model.add(Dense(64, activation='relu', input_shape=(featureVec_size,) ))	#small dataset - less hidden layers needed
-#model.add(Dense(40, activation='relu'))
+model.add(Dense(40, activation='relu'))
 model.add(Dense(final_dim, activation='sigmoid'))
 
 model.summary()
@@ -34,7 +34,7 @@ model.compile(loss='binary_crossentropy',
               optimizer=sgd,
               metrics=['accuracy'])
 
-history = model.fit(xtrain, ytrain, epochs=50, batch_size=batch_sz)
+history = model.fit(xtrain, ytrain, epochs=200, batch_size=batch_sz)
 
 # Time to test!
 score = model.evaluate(xtest, ytest, batch_size=batch_sz)

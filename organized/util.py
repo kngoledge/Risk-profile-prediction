@@ -45,33 +45,33 @@ def get_unique(column):
 
 ############################################################
 
-def regionInfo():
+def build_dict(filename):
 	""" 
 		Returns a tuple consisting of
 		(1) the list of regions
 		(2) a dictionary mapping countries to regions
 	"""
 	your_list = []
-	with open('countrylist.csv') as inputfile:
+	with open(filename) as inputfile:
 		for row in csv.reader(inputfile):
 			your_list.append(row[0])
 
 	your_list = your_list[1:]
 
-	regionDict = {}		# maps country to region
-	regions = []		# list of regions
-	region = ''
+	dictionary = {}		# maps country to region
+	categories = []		# list of regions
+	category = ''
 
-	for country in your_list:
-		if country[0] == '*':
-			region = country[1:]
-			regionDict[region] = region
-			regions.append(region)
+	for item in your_list:
+		if item[0] == '*':
+			category = item[1:]
+			categories[category] = category
+			categories.append(category)
 
 		else:
-			regionDict[country] = region
+			dictionary[item] = category
 
-	return regions, regionDict
+	return categories, dictionary
 
 def featurize(inputList, featureVec):
 	"""
@@ -89,11 +89,11 @@ def featurize(inputList, featureVec):
 
 	return newVec.tolist()
 
-def featurize_country(inputList, featureVec, dictionary):
+def featurize_complex(inputList, featureVec, dictionary):
 	"""
-	Converts a list of string inputs (countries) into an
-	extracted feature vector (based on regions).
-	Outputs a sparse feature vector of regions.
+	Converts a list of string inputs (countries or sectors) into an
+	extracted feature vector (based on regions or standard sectors).
+	Outputs a sparse feature vector (of regions or standard sectors).
 	"""
 	newVec = np.zeros(len(featureVec))
 
@@ -102,7 +102,6 @@ def featurize_country(inputList, featureVec, dictionary):
 			for i in range(len(featureVec)):
 				if dictionary[s] == featureVec[i]: 
 					newVec[i] = 1
-					break
 
 	return newVec.tolist()
 
@@ -185,9 +184,11 @@ def organize_data(filename, numTrainers):
 	Outputs a sparse feature vector of regions.
 	"""
 
-	regions = regionInfo()[0]
-	regionDict = regionInfo()[1]
-	sectors = ['Agribusiness', 'Infrastructure', 'Conservation and environmental protection', 'Energy', 'Healthcare', 'Manufacturing', 'Community capacity and development', 'Forestry', 'Chemicals', 'Other', 'Regulatory Development', 'Land reform', 'Education', 'Extractives (oil/gas/mining)']
+	regions = build_dict('countrylist.csv')[0]
+	regionDict = build_dict()[1]
+	sectors = build_dict('sectorlist.csv')[0]
+	sectorDict = build_dict()[1]
+	#sectors = ['Agribusiness', 'Infrastructure', 'Conservation and environmental protection', 'Energy', 'Healthcare', 'Manufacturing', 'Community capacity and development', 'Forestry', 'Chemicals', 'Other', 'Regulatory Development', 'Land reform', 'Education', 'Extractives (oil/gas/mining)']
 	issues = ['Other retaliation (actual or feared)', 'Livelihoods', 'Labor', 'Consultation and disclosure', 'Property damage', 'Other', 'Indigenous peoples', 'Cultural heritage', 'Personnel issues', 'Water', 'Other gender-related issues', 'Biodiversity', 'Procurement', 'Gender-based violence', 'Other community health and safety issues', 'Pollution', 'Human rights', "Violence against the community (by gov't and/or company)", 'Due diligence', 'Displacement (physical and/or economic)', 'Other environmental', 'Corruption/fraud', 'NONE']
 	# add no issues to feature vector: will have to create a specialized featurize function
 
@@ -212,7 +213,8 @@ def organize_data(filename, numTrainers):
 	ytrain = []
 	trainExamples = clean_df[:numTrainers]
 	for i in range(numTrainers):
-		x = featurize_country(trainExamples[i][0], regions, regionDict)+featurize(trainExamples[i][1], sectors)
+		x = featurize_complex(trainExamples[i][0], regions, regionDict)+featurize_complex(trainExamples[i][1], sectors, sectorDict)
+		#x = featurize_complex(trainExamples[i][0], regions, regionDict)+featurize(trainExamples[i][1], sectors)
 		y = featurize_issue(trainExamples[i][2], issues)
 		#y = featurize_issue(trainExamples[i][2], issueGroups)	# DELETE LATER IF FAIL
 		xtrain.append(x)
@@ -226,7 +228,7 @@ def organize_data(filename, numTrainers):
 	testExamples = clean_df[numTrainers:]
 	numTesters = len(testExamples)      #change to len(testExamples)
 	for i in range(numTesters):
-		x = featurize_country(testExamples[i][0], regions, regionDict)+featurize(trainExamples[i][1], sectors)
+		x = featurize_complex(testExamples[i][0], regions, regionDict)+featurize_complex(testExamples[i][1], sectors, sectorDict)
 		y = featurize_issue(testExamples[i][2], issues)
 		#y = featurize_issue(testExamples[i][2], issueGroups)	# DELETE LATER IF FAIL
 		xtest.append(x)
