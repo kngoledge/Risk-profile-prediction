@@ -21,8 +21,8 @@ batch_sz = 100
 
 # Create the model
 model = Sequential()
-model.add(Dense(100, activation='relu', input_shape=(featureVec_size,) ))
-model.add(Dense(64, activation='relu'))
+model.add(Dense(64, activation='relu', input_shape=(featureVec_size,) ))	#small dataset - less hidden layers needed
+#model.add(Dense(40, activation='relu'))
 model.add(Dense(final_dim, activation='sigmoid'))
 
 model.summary()
@@ -42,3 +42,10 @@ score = model.evaluate(xtest, ytest, batch_size=batch_sz)
 print "\nCompiled! Here are your results..."
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
+
+############################################################
+"""
+	NOTES: 
+	- Consider shrinking the number of issues (from 15 to 4) - leads to acc of 100%... too high
+
+"""

@@ -5,34 +5,6 @@ import pandas as pd
 import numpy as np
 import csv
 
-def regionInfo():
-	""" 
-		Returns a tuple consisting of
-		(1) the list of regions
-		(2) a dictionary mapping countries to regions
-	"""
-	your_list = []
-	with open('countrylist.csv') as inputfile:
-		for row in csv.reader(inputfile):
-			your_list.append(row[0])
-
-	your_list = your_list[1:]
-
-	regionDict = {}		# maps country to region
-	regions = []		# list of regions
-	region = ''
-
-	for country in your_list:
-		if country[0] == '*':
-			region = country[1:]
-			regionDict[region] = region
-			regions.append(region)
-
-		else:
-			regionDict[country] = region
-
-	return regions, regionDict
-
 def prepare_raw_data(filename): 
 	""" 
 		Slice relevant columns for country, sector, and issue
@@ -71,10 +43,40 @@ def get_unique(column):
 				u_column.append(y)
 	return list(set(u_column))
 
+############################################################
+
+def regionInfo():
+	""" 
+		Returns a tuple consisting of
+		(1) the list of regions
+		(2) a dictionary mapping countries to regions
+	"""
+	your_list = []
+	with open('countrylist.csv') as inputfile:
+		for row in csv.reader(inputfile):
+			your_list.append(row[0])
+
+	your_list = your_list[1:]
+
+	regionDict = {}		# maps country to region
+	regions = []		# list of regions
+	region = ''
+
+	for country in your_list:
+		if country[0] == '*':
+			region = country[1:]
+			regionDict[region] = region
+			regions.append(region)
+
+		else:
+			regionDict[country] = region
+
+	return regions, regionDict
+
 def featurize(inputList, featureVec):
 	"""
-	Converts a list of string inputs (sectors or issues) into an
-	extracted feature vector, based on the related feature vector.
+	Converts a list of string inputs (sectors) into an extracted 
+	feature vector, based on the related feature vector.
 	Outputs a sparse feature vector.
 	"""
 	newVec = np.zeros(len(featureVec))
@@ -82,7 +84,7 @@ def featurize(inputList, featureVec):
 	for s in inputList:
 		for i in range(len(featureVec)):
 			if s == featureVec[i]: 
-				newVec[i] += 1
+				newVec[i] = 1
 				break
 
 	return newVec.tolist()
@@ -99,10 +101,79 @@ def featurize_country(inputList, featureVec, dictionary):
 		if s in dictionary:
 			for i in range(len(featureVec)):
 				if dictionary[s] == featureVec[i]: 
-					newVec[i] += 1
+					newVec[i] = 1
 					break
 
 	return newVec.tolist()
+
+def featurize_issue(inputList, featureVec):
+	"""
+	Converts a list of string inputs (issues) into an extracted 
+	feature vector, based on the related feature vector.
+	If no issues, then the 'NONE' element is marked true.
+	Outputs a sparse feature vector.
+	"""
+	newVec = np.zeros(len(featureVec))
+	numIssues = 0
+
+	for s in inputList:
+		for i in range(len(featureVec) - 1):
+			if s == featureVec[i]: 
+				newVec[i] = 1
+				numIssues += 1
+				break
+
+	if numIssues == 0: featureVec[-1] = 1
+	return newVec.tolist()
+
+# def featurize_issue(inputList, featureVec):
+# 	"""
+# 	Converts a list of string inputs (issues) into an extracted 
+# 	feature vector, based on the related feature vector.
+# 	If no issues, then the 'NONE' element is marked true.
+# 	Outputs a sparse feature vector.
+# 	"""
+
+# 	issueDict = { 
+# 		'Other retaliation (actual or feared)': 'Violence',
+# 		'Livelihoods': 'Community',
+# 		'Labor': 'Malpractice',
+# 		'Consultation and disclosure': 'Malpractice',
+# 		'Property damage': 'Community',
+# 		'Indigenous peoples': 'Community',
+# 		'Cultural heritage': 'Community',
+# 		'Personnel issues': 'Malpractice',
+# 		'Water': 'Environmental',
+# 		'Other gender-related issues': 'Violence',
+# 		'Biodiversity': 'Environmental',
+# 		'Procurement': 'Malpractice',
+# 		'Gender-based violence': 'Violence',
+# 		'Other community health and safety issues': 'Community',
+# 		'Pollution': 'Environmental',
+# 		'Human rights': 'Violence',
+# 		"Violence against the community (by gov't and/or company)": 'Violence',
+# 		'Due diligence': 'Malpractice',
+# 		'Displacement (physical and/or economic)': 'Community',
+# 		'Other environmental': 'Envrionmental',
+# 		'Corruption/fraud': 'Malpractice',
+# 		'Other': 'Other',
+# 		'NONE': 'NONE'
+# 	}
+
+# 	newVec = np.zeros(len(featureVec))
+# 	numIssues = 0
+
+# 	for s in inputList:
+# 		if s in issueDict:
+# 			for i in range(len(featureVec)-1):
+# 				if issueDict[s] == featureVec[i]: 
+# 					newVec[i] = 1
+# 					numIssues += 1
+# 					break
+
+# 	if numIssues == 0: featureVec[-1] = 1
+# 	newVec = np.zeros(len(featureVec))
+# 	return newVec.tolist()
 
 
 ############################################################
@@ -117,11 +188,21 @@ def organize_data(filename, numTrainers):
 	regions = regionInfo()[0]
 	regionDict = regionInfo()[1]
 	sectors = ['Agribusiness', 'Infrastructure', 'Conservation and environmental protection', 'Energy', 'Healthcare', 'Manufacturing', 'Community capacity and development', 'Forestry', 'Chemicals', 'Other', 'Regulatory Development', 'Land reform', 'Education', 'Extractives (oil/gas/mining)']
-	issues = ['Other retaliation (actual or feared)', 'Livelihoods', 'Labor', 'Consultation and disclosure', 'Property damage', 'Other', 'Indigenous peoples', 'Cultural heritage', 'Personnel issues', 'Water', 'Other gender-related issues', 'Biodiversity', 'Procurement', 'Gender-based violence', 'Other community health and safety issues', 'Pollution', 'Human rights', "Violence against the community (by gov't and/or company)", 'Due diligence', 'Displacement (physical and/or economic)', 'Other environmental', 'Corruption/fraud']
+	issues = ['Other retaliation (actual or feared)', 'Livelihoods', 'Labor', 'Consultation and disclosure', 'Property damage', 'Other', 'Indigenous peoples', 'Cultural heritage', 'Personnel issues', 'Water', 'Other gender-related issues', 'Biodiversity', 'Procurement', 'Gender-based violence', 'Other community health and safety issues', 'Pollution', 'Human rights', "Violence against the community (by gov't and/or company)", 'Due diligence', 'Displacement (physical and/or economic)', 'Other environmental', 'Corruption/fraud', 'NONE']
+	# add no issues to feature vector: will have to create a specialized featurize function
+
 
 	numRegions = len(regions)
 	numSectors = len(sectors)
 	numIssues = len(issues)
+
+	print('Num of Regions is ', numRegions)
+	print('Num of Sectors is ', numSectors)	
+	print('Num of Issues is ', numIssues)
+
+	# issueGroups = ['Community', 'Environmental', 'Malpractice', 'Other', 'NONE']	# DELETE LATER IF FAIL
+	# numGroups = len(issueGroups)
+	# print('Num of Issue Groups is ', numGroups)
 
 	df = prepare_raw_data(filename)
 	clean_df = prepare_clean_data(df)
@@ -132,7 +213,8 @@ def organize_data(filename, numTrainers):
 	trainExamples = clean_df[:numTrainers]
 	for i in range(numTrainers):
 		x = featurize_country(trainExamples[i][0], regions, regionDict)+featurize(trainExamples[i][1], sectors)
-		y = featurize(trainExamples[i][2], issues)
+		y = featurize_issue(trainExamples[i][2], issues)
+		#y = featurize_issue(trainExamples[i][2], issueGroups)	# DELETE LATER IF FAIL
 		xtrain.append(x)
 		ytrain.append(y)
 	xtrain = np.asarray(xtrain)
@@ -145,13 +227,15 @@ def organize_data(filename, numTrainers):
 	numTesters = len(testExamples)      #change to len(testExamples)
 	for i in range(numTesters):
 		x = featurize_country(testExamples[i][0], regions, regionDict)+featurize(trainExamples[i][1], sectors)
-		y = featurize(trainExamples[i][2], issues)
+		y = featurize_issue(testExamples[i][2], issues)
+		#y = featurize_issue(testExamples[i][2], issueGroups)	# DELETE LATER IF FAIL
 		xtest.append(x)
 		ytest.append(y)
 	xtest = np.asarray(xtest)
 	ytest = np.asarray(ytest)
 
 	return xtrain, ytrain, xtest, ytest, numRegions, numSectors, numIssues
+	#return xtrain, ytrain, xtest, ytest, numRegions, numSectors, numGroups
 
 
 
