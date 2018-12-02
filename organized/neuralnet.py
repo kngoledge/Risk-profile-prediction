@@ -13,11 +13,11 @@ import util
 ############################################################
 
 # Parameters
-numTrainers = 600
-xtrain, ytrain, xtest, ytest, numRegions, numSectors, numIssues = util.organize_data('complaints.csv', numTrainers)
+numTrainers = 6000
+xtrain, ytrain, xtest, ytest, numRegions, numSectors, numIssues = util.organize_data(numTrainers)
 featureVec_size = numRegions + numSectors
 final_dim = numIssues
-batch_sz = 64
+batch_sz = 256
 
 # Create the model
 model = Sequential()

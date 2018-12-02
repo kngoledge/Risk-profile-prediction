@@ -4,65 +4,21 @@ import math
 import pandas as pd
 import numpy as np
 import csv
-import re
 
-############################################################
-##  Related to data preparation
-############################################################
+def prepare_raw_data(filename): 
+	""" 
+		Slice relevant columns for country, sector, and issue
+		and returns master complaint csv for project purposes.
+	"""
+	df = pd.read_csv(filename)
+	df = df[['Country', 'Sector/Industry (1)','Sector/Industry (2)',
+		 'Issue Raised (1)','Issue Raised (2)', 'Issue Raised (3)', 
+		 'Issue Raised (4)','Issue Raised (5)', 'Issue Raised (6)', 
+		 'Issue Raised (7)', 'Issue Raised (8)', 'Issue Raised (9)', 
+		 'Issue Raised (10)']]
+	return df.fillna('')
 
-def prepare_raw_WB_project_data():
-	wb_small = pd.read_csv('WBsubset.csv')
-	wb_small = wb_small[['sector1','sector2', 'sector3', 'sector4', 'sector5', 'sector', 'mjsector1','mjsector2', 'mjsector3', 'mjsector4', 'mjsector5', 'mjsector','Country','project_name']]
-	return wb_small.fillna('')
-
-
-def clean_sector_string(sector_string):
-	sector_string = str(sector_string)
-	if sector_string == 'nan':
-		return []
-	to_return = []
-	sec = sector_string.split(';')
-	for y in sec:
-		to_add = re.sub(r'!\$!\d*!\$!\D\D', "", y)
-		to_add = re.sub(r'\(.*\)', "", to_add)
-	if to_add:
-		if to_add[0] == " ":
-			to_add = to_add[1:]
-		to_return.append(to_add)
-	return to_return
-
-
-def prepare_clean_WB_project_data(df):
-        """
-                Returns a list of tuples, where the tuples are
-                (project_name, [countries], [sectors]) for every datapoint
-        """
-	clean_data = []
-	for index, x in df.iterrows():
-		clean_sectors = clean_sector_string(x['sector1'])+clean_sector_string(x['sector2'])+clean_sector_string(x['sector3'])+clean_sector_string(x['sector4'])+clean_sector_string(x['sector5'])+clean_sector_string(x['sector'])+clean_sector_string(x['mjsector1'])+clean_sector_string(x['mjsector2'])+clean_sector_string(x['mjsector3'])+clean_sector_string(x['mjsector4'])+clean_sector_string(x['mjsector5'])+clean_sector_string(x['mjsector'])
-		clean_countries = list(set(x['Country'].split(';')))
-		clean_tuple = (x['project_name'], clean_countries, clean_sectors)
-		clean_data.append(clean_tuple)
-	return clean_data
-
-
-
-def prepare_raw_complaint_data(filename): 
-        """ 
-                Slice relevant columns for country, sector, and issue
-                and returns master complaint csv for project purposes.
-        """
-        df = pd.read_csv(filename)
-        df = df[['Country', 'Sector/Industry (1)','Sector/Industry (2)',
-                 'Issue Raised (1)','Issue Raised (2)', 'Issue Raised (3)', 
-                 'Issue Raised (4)','Issue Raised (5)', 'Issue Raised (6)', 
-                 'Issue Raised (7)', 'Issue Raised (8)', 'Issue Raised (9)', 
-                 'Issue Raised (10)']]
-        return df.fillna('')
-
-
-
-def prepare_clean_complaint_data(df):
+def prepare_clean_data(df):
 	""" 
 		Returns a list of tuples, where the tuples are 
 		([countries], [sectors], [issues]) for every datapoint
@@ -87,42 +43,6 @@ def get_unique(column):
 				u_column.append(y)
 	return list(set(u_column))
 
-"""
-	proj_names is list of project names from COMPLAINTS
-	wb_data is list of tuples where each element is tuple of (project name, [countries], [sectors])
-	updates wb_data to remove instances of matching project names
-"""
-def remove_duplicate_projects(proj_names, wb_data):
-	unmatched_data = []
-	for name in proj_names:
-		match = False
-		for i, tup in enumerate(wb_data):
-			if tup[0] == name:
-				match = True
-				break
-		if match == False: unmatched_data.append(tup)
-	return unmatched_data
-
-
-"""
-	Returns a shuffled combo of complaint_data and WB_data
-	Complaint Data: list of ([countries], [sectors], [issues]) tuples
-	WB Data:        list of (proj name, [countries], [sectors]) tuples
-"""
-def combine_datasets(complaint_data, WB_data, numIssues):
-	
-	for i in range(len(WB_data)):
-		noIssues = np.zeros(numIssues)
-		noIssues[-1] = 1                # mark NONE as true
-		complaint_data.append( (WB_data[i][1],WB_data[2],noIssues) )
-
-	complaint_array = np.asarray(complaint_data)		# PLS FIX THIS
-	np.random.shuffle(complaint_array)
-
-	return list(complaint_array)
-
-############################################################
-##  Related to featurization
 ############################################################
 
 def build_dict(filename):
@@ -257,7 +177,7 @@ def featurize_issue(inputList, featureVec):
 
 ############################################################
 
-def organize_data(numTrainers):
+def organize_data(filename, numTrainers):
 	"""
 	Converts a list of string inputs (countries) into an
 	extracted feature vector (based on regions).
@@ -279,22 +199,17 @@ def organize_data(numTrainers):
 	print('Num of Sectors is ', numSectors)	
 	print('Num of Issues is ', numIssues)
 
-
 	# issueGroups = ['Community', 'Environmental', 'Malpractice', 'Other', 'NONE']	# DELETE LATER IF FAIL
 	# numGroups = len(issueGroups)
 	# print('Num of Issue Groups is ', numGroups)
 
-	complaint_df = prepare_raw_complaint_data()
-	complaint_clean_df = prepare_clean_complaint_data(complaint_df)
-	WB_df = prepare_raw_WB_project_data()
-	WB_clean_df = prepare_clean_WB_project_data(WB_df)
-	unique_WB_data = remove_duplicate_projects(complaint_clean_df, WB_clean_df)
-	total_dataset = combine_datasets(complaint_clean_df, unique_WB_data, numIssues)
+	df = prepare_raw_data(filename)
+	clean_df = prepare_clean_data(df)
 
 	## Training Data
 	xtrain = []
 	ytrain = []
-	trainExamples = total_dataset[:numTrainers]
+	trainExamples = clean_df[:numTrainers]
 	for i in range(numTrainers):
 		x = featurize_complex(trainExamples[i][0], regions, regionDict)+featurize_complex(trainExamples[i][1], sectors, sectorDict)
 		#x = featurize_complex(trainExamples[i][0], regions, regionDict)+featurize(trainExamples[i][1], sectors)
@@ -308,7 +223,7 @@ def organize_data(numTrainers):
 	## Testing Data
 	xtest = []
 	ytest = []
-	testExamples = total_dataset[numTrainers:]
+	testExamples = clean_df[numTrainers:]
 	numTesters = len(testExamples)      #change to len(testExamples)
 	for i in range(numTesters):
 		x = featurize_complex(testExamples[i][0], regions, regionDict)+featurize_complex(testExamples[i][1], sectors, sectorDict)
