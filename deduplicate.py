@@ -9,5 +9,5 @@ def remove_duplicate_projects(proj_names, wb_data):
 			if tup[0] == name:
 				match = True
 				break
-			if match == False: unmatched_data.append(tup)
+		if match == False: unmatched_data.append(tup)
 	return unmatched_data
