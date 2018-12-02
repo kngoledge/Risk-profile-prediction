@@ -1,17 +1,24 @@
 ﻿hello
+*Global
+Multi-Regional
+World
 *Australia and New Zealand
+Commonwealth of Australia
 Australia
 New Zealand
 Norfolk Island
 *Caribbean
+Organization of Eastern Caribbean States
 Anguilla
 Antigua and Barbuda
 Aruba
+Commonwealth of The Bahamas
 Bahamas
 Barbados
 British Virgin Islands
 Cayman Islands
 Cuba
+Commonwealth of Dominica
 Dominica
 Dominican Republic
 Grenada
@@ -23,23 +30,32 @@ Montserrat
 Netherlands Antilles
 Puerto Rico
 Saint Barthelemy
+St. Kitts and Nevis
 Saint Kitts and Nevis
+St. Lucia
 Saint Lucia
+Sint Maarten
 Saint Martin
+St. Vincent and the Grenadines
 Saint Vincent and the Grenadines
 Trinidad and Tobago
 Turks and Caicos Islands
 U.S. Virgin Islands
 *Central America
+Latin America
 Belize
 Costa Rica
 El Salvador
 Guatemala
 Honduras
+United Mexican States
 Mexico
 Nicaragua
 Panama
 *Central Asia
+Asia
+Europe and Central Asia
+Aral Sea
 Kazakhstan
 Kyrgyzstan
 Kyrgyz Republic
@@ -50,10 +66,15 @@ Uzbekistan
 Guernsey
 Jersey
 *Eastern Africa
+Africa
 Burundi
+Union of the Comoros
 Comoros
+Red Sea and Gulf of Aden
 Djibouti
+State of Eritrea
 Eritrea
+Federal Democratic Republic of Ethiopia
 Ethiopia
 Kenya
 Madagascar
@@ -64,12 +85,17 @@ Mozambique
 Rwanda
 Reunion
 Seychelles
+Somali Democratic Republic
 Somalia
+United Republic of Tanzania
 Tanzania
 Uganda
 Zambia
 Zimbabwe
 *Eastern Asia
+Asia
+East Asia and Pacific
+People's Republic of China
 China
 Hong Kong
 Hong Kong SAR China
@@ -77,10 +103,13 @@ Japan
 Macau
 Macau SAR China
 Mongolia
+Korea
 North Korea
 South Korea
 Taiwan
 *East Europe
+EU Accession Countries
+Europe and Central Asia
 Belarus
 Bulgaria
 Czech Republic
@@ -88,44 +117,63 @@ Hungary
 Moldova
 Poland
 Romania
+Russian Federation
 Russia
 Slovakia
 Slovak Republic
 Ukraine
 Union of Soviet Socialist Republics
 *Melanesia
+Pacific Islands
 Fiji
 New Caledonia
+The Independent State of Papua New Guine
 Papua New Guinea
 Solomon Islands
 Vanuatu
 *Micronesian Region
+Pacific Islands
+Federated States of Micronesia
 Guam
 Kiribati
+the Marshall Islands
 Marshall Islands
 Micronesia
 Nauru
 Northern Mariana Islands
 Palau
 *Middle Africa
+Central Africa
+Africa
 Angola
 Cameroon
 Central African Republic
 Chad
 Congo
+Democratic Republic of the Congo
 Democratic Republic of Congo
 DRC
 Congo - Brazzaville
 Congo - Kinshasa
 Equatorial Guinea
+Gabonese Republic
 Gabon
+Democratic Republic of Sao Tome and Prin
 Sao Tome and Principe
 *Northern Africa
+Africa
+Middle East and North Africa
 MENA region
+People's Democratic Republic of Algeria
 Algeria
+Arab Republic of Egypt
 Egypt
+Socialist People's Libyan Arab Jamahiriy
 Libya
+Kingdom of Morocco
 Morocco
+the Sudan
+South Sudan
 Sudan
 Tunisia
 Western Sahara
@@ -136,6 +184,9 @@ Greenland
 Saint Pierre and Miquelon
 United States
 *Northern Europe
+EU Accession Countries
+Europe and Central Asia
+Kingdom of Denmark
 Denmark
 Estonia
 Faroe Islands
@@ -147,12 +198,14 @@ Isle of Man
 Jersey
 Latvia
 Lithuania
+Kingdom of Norway
 Norway
 Svalbard and Jan Mayen
 Sweden
 United Kingdom
 Aland Islands
 *Polynesia
+Pacific Islands
 American Samoa
 Cook Islands
 French Polynesia
@@ -160,124 +213,184 @@ Niue
 Pitcairn Islands
 Samoa
 Tokelau
+Kingdom of Tonga
 Tonga
 Tuvalu
 Wallis and Futuna
 *South America
+Latin America
+Mercosur
+Argentine Republic
 Argentina
+Plurinational State of Bolivia
 Bolivia
+Federative Republic of Brazil
 Brazil
 Chile
+Andean Countries
 Colombia
 Ecuador
 Falkland Islands
 French Guiana
+Co-operative Republic of Guyana
 Guyana
 Paraguay
 Peru
 Suriname
+Oriental Republic of Uruguay
 Uruguay
+Republica Bolivariana de Venezuela
 Venezuela
 *South-Eastern Asia
+Asia
 Brunei
+Kingdom of Cambodia
 Cambodia
 Indonesia
+Lao People's Democratic Republic
 Laos
 Malaysia
+Mekong
+the Union of Myanmar
 Myanmar
 Burma
+the Philippines
 Philippines
 Singapore
+Kingdom of Thailand
 Thailand
+Democratic Republic of Timor-Leste
 Timor-Leste
+Socialist Republic of Vietnam
 Vietnam
 *Southern Africa
+Africa
 Botswana
+Kingdom of Lesotho
 Lesotho
 Namibia
 South Africa
+Kingdom of Eswatini
 Swaziland
 *Southern Asia
+Asia
 South Asia
+Islamic  Republic of Afghanistan
 Afghanistan
+People's Republic of Bangladesh
 Bangladesh
+Kingdom of Bhutan
 Bhutan
 India
+Islamic Republic of Iran
 Iran
 Maldives
 Nepal
+Islamic Republic of Pakistan
 Pakistan
+Democratic Socialist Republic of Sri Lan
 Sri Lanka
 *Southern Europe
+EU Accession Countries
+Europe and Central Asia
+Western Balkans
 Albania
 Andorra
+former Yugoslav Republic of
+Socialist Federal Republic of Yugoslavia
 Herzegovina
 Bosnia
 Bosnia and Herzegovina
 Croatia
 Gibraltar
+Hellenic Republic
 Greece
+Italian Republic
 Italy
 Macedonia
 Malta
 Montenegro
+Portuguese Republic
 Portugal
 San Marino
+Kosovo
 Serbia
 Serbia and Montenegro
 Slovenia
+Kingdom of Spain
 Spain
 Vatican City
 *Western Africa
+Africa
 Benin
 Burkina Faso
+Cabo Verde
 Cape Verde
 Cote d’Ivoire
+The Gambia
 Gambia
 Ghana
 Guinea
 Guinea-Bissau
 Liberia
 Mali
+Islamic Republic of Mauritania
 Mauritania
 Niger
+Federal Republic of Nigeria
 Nigeria
 Saint Helena
 Senegal
 Sierra Leone
 Togo
 *Western Asia
+Middle East and North Africa
+Asia
 MENA region
 Middle East
 Armenia
+Caucasus
 Azerbaijan
 Bahrain
 Cyprus
 Georgia
 Iraq
+West Bank and Gaza
+State of Israel
 Israel
+Hashemite Kingdom of Jordan
 Jordan
 Kuwait
+Lebanese Republic
 Lebanon
 Neutral Zone
+Sultanate of Oman
 Oman
 Palestinian Territories
+Red Sea and Gulf of Aden
 People's Democratic Republic of Yemen
 Qatar
 Saudi Arabia
+Syrian Arab Republic
 Syria
 Turkey
 United Arab Emirates
 Yemen
 *Western Europe
+EU Accession Countries
+Europe and Central Asia
 Austria
+Kingdom of Belgium
 Belgium
 East Germany
+French Republic
 France
 Germany
 Liechtenstein
+Grand Duchy of Luxembourg
 Luxembourg
 Metropolitan France
 Monaco
+Kingdom of the Netherlands
 Netherlands
 Switzerland
