@@ -13,7 +13,7 @@ import util
 ############################################################
 
 # Parameters
-numTrainers = 6000
+numTrainers = 5000
 xtrain, ytrain, xtest, ytest, numRegions, numSectors, numIssues = util.organize_data(numTrainers)
 featureVec_size = numRegions + numSectors
 final_dim = numIssues
