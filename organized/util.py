@@ -264,9 +264,8 @@ def featurize_issue(inputList, featureVec):
 
 def organize_data():
 	"""
-	Converts a list of string inputs (countries) into an
-	extracted feature vector (based on regions).
-	Outputs a sparse feature vector of regions.
+	Returns a list of inputs (x) and outputs (y) for the entire combined dataset.
+	You must partition train vs. test & convert lists to arrays within neuralnet function. 
 	"""
 
 	regions, regionDict = build_dict('countrylist.csv')
