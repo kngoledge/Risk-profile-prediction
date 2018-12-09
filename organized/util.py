@@ -12,7 +12,7 @@ import re
 
 def prepare_raw_WB_project_data():
 	wb_small = pd.read_csv('WBsubset.csv')
-	wb_small = wb_small[['sector1','sector2', 'sector3', 'sector4', 'sector5', 'sector', 'mjsector1','mjsector2', 'mjsector3', 'mjsector4', 'mjsector5', 'mjsector','Country','project_name']]
+	wb_small = wb_small[['sector1','sector2', 'sector3', 'sector4', 'sector5', 'sector', 'mjsector1','mjsector2', 'mjsector3', 'mjsector4', 'mjsector5', 'mjsector','Country','project_name', 'totalamt', 'grantamt']]
 	return wb_small.fillna('')
 
 
@@ -41,6 +41,8 @@ def prepare_clean_WB_project_data(df):
 	for index, x in df.iterrows():
 		clean_sectors = clean_sector_string(x['sector1'])+clean_sector_string(x['sector2'])+clean_sector_string(x['sector3'])+clean_sector_string(x['sector4'])+clean_sector_string(x['sector5'])+clean_sector_string(x['sector'])+clean_sector_string(x['mjsector1'])+clean_sector_string(x['mjsector2'])+clean_sector_string(x['mjsector3'])+clean_sector_string(x['mjsector4'])+clean_sector_string(x['mjsector5'])+clean_sector_string(x['mjsector'])
 		clean_countries = list(set(x['Country'].split(';')))
+		#clean_money = int(x['totalamt']) + int(x['grantamt'])
+		#clean_tuple = (x['project_name'], clean_countries, clean_sectors, clean_money)
 		clean_tuple = (x['project_name'], clean_countries, clean_sectors)
 		clean_data.append(clean_tuple)
 	return clean_data
