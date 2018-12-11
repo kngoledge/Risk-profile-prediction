@@ -48,6 +48,21 @@ def prepare_clean_WB_project_data(df):
 	return clean_data
 
 
+def prepare_2016_17_data(): 
+    df = pd.read_csv('2016_17_complaints.csv')
+    df = df.fillna('')
+    df = pd.DataFrame({'Country': df['Country'], 'Finance': df['Money'], 'Issues': df['Issues'], 'Sector': df['Sector']})
+    clean_data = [] 
+    # clean data
+    for index, x in df.iterrows():
+        country = (x['Country'].split('/'))
+        finance = (x['Finance'])
+        issue = ([y.lstrip().rstrip() for y in str(x['Issues']).replace('Unknown', 'Other').replace('Extractives (oil, gas, mining)', 'Extractives (oil/gas/mining)').replace(', ', ',').replace(',', ';').split(';')])
+        sector = (x['Sector'].split(';'))
+        if country or finance or issue or sector:
+            clean_tuple = (country, issue, sector finance)
+            clean_data.append(clean_tuple)
+    return clean_data
 
 def prepare_raw_complaint_data(): 
         """ 
