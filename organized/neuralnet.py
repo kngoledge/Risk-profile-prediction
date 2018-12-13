@@ -29,8 +29,8 @@ def change_by_threshold(threshold, values_vector):
 
 # Parameters
 numTrainers = 5000	# DECIDE SPLIT BETWEEN TRAINING AND TEST
-xlist, ylist, numRegions, numSectors, numIssues = util.organize_data()
-featureVec_size = numRegions + numSectors
+xlist, ylist, numRegions, numSectors, numIssues, numMoney = util.organize_data()
+featureVec_size = numRegions + numSectors + numMoney
 final_dim = numIssues
 batch_sz = 256
 

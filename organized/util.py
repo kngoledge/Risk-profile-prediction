@@ -10,6 +10,10 @@ import re
 ##  Related to data preparation
 ############################################################
 
+MAX_MONEY = 1.5*10**9    # financial info, for reference
+MIN_MONEY = 10**4
+NUM_MONEY_BUCKETS = 10
+
 def prepare_raw_WB_project_data():
 	wb_small = pd.read_csv('WBsubset.csv')
 	wb_small = wb_small[['sector1','sector2', 'sector3', 'sector4', 'sector5', 'sector', 'mjsector1','mjsector2', 'mjsector3', 'mjsector4', 'mjsector5', 'mjsector','Country','project_name', 'totalamt', 'grantamt']]
@@ -33,49 +37,52 @@ def clean_sector_string(sector_string):
 
 
 def prepare_clean_WB_project_data(df):
-        """
-                Returns a list of tuples, where the tuples are
-                (project_name, [countries], [sectors]) for every datapoint
-        """
+	"""
+		Returns a list of tuples, where the tuples are
+		(project_name, [countries], [sectors], finance) for every datapoint
+	"""
 	clean_data = []
 	for index, x in df.iterrows():
 		clean_sectors = clean_sector_string(x['sector1'])+clean_sector_string(x['sector2'])+clean_sector_string(x['sector3'])+clean_sector_string(x['sector4'])+clean_sector_string(x['sector5'])+clean_sector_string(x['sector'])+clean_sector_string(x['mjsector1'])+clean_sector_string(x['mjsector2'])+clean_sector_string(x['mjsector3'])+clean_sector_string(x['mjsector4'])+clean_sector_string(x['mjsector5'])+clean_sector_string(x['mjsector'])
 		clean_countries = list(set(x['Country'].split(';')))
-		#clean_money = int(x['totalamt']) + int(x['grantamt'])
-		#clean_tuple = (x['project_name'], clean_countries, clean_sectors, clean_money)
-		clean_tuple = (x['project_name'], clean_countries, clean_sectors)
+		clean_money = int(x['totalamt']) + int(x['grantamt'])
+		clean_tuple = (x['project_name'], clean_countries, clean_sectors, clean_money)
 		clean_data.append(clean_tuple)
 	return clean_data
 
 
 def prepare_2016_17_data(): 
-    df = pd.read_csv('2016_17_complaints.csv')
-    df = df.fillna('')
-    df = pd.DataFrame({'Country': df['Country'], 'Finance': df['Money'], 'Issues': df['Issues'], 'Sector': df['Sector']})
-    clean_data = [] 
-    # clean data
-    for index, x in df.iterrows():
-        country = (x['Country'].split('/'))
-        finance = (x['Finance'])
-        issue = ([y.lstrip().rstrip() for y in str(x['Issues']).replace('Unknown', 'Other').replace('Extractives (oil, gas, mining)', 'Extractives (oil/gas/mining)').replace(', ', ',').replace(',', ';').split(';')])
-        sector = (x['Sector'].split(';'))
-        if country or finance or issue or sector:
-            clean_tuple = (country, issue, sector finance)
-            clean_data.append(clean_tuple)
-    return clean_data
+	""" 
+		Returns a list of tuples, where the tuples are 
+		([countries], [sectors], [issues], finance) for every datapoint
+	"""
+	df = pd.read_csv('2016_17_complaints.csv')
+	df = df.fillna('')
+	df = pd.DataFrame({'Country': df['Country'], 'Finance': df['Money'], 'Issues': df['Issues'], 'Sector': df['Sector']})
+	clean_data = [] 
+	# clean data
+	for index, x in df.iterrows():
+		country = (x['Country'].split('/'))
+		finance = (x['Finance'])
+		issue = ([y.lstrip().rstrip() for y in str(x['Issues']).replace('Unknown', 'Other').replace('Extractives (oil, gas, mining)', 'Extractives (oil/gas/mining)').replace(', ', ',').replace(',', ';').split(';')])
+		sector = (x['Sector'].split(';'))
+		if country or finance or issue or sector:
+			clean_tuple = (country, issue, sector, finance)
+			clean_data.append(clean_tuple)
+	return clean_data
 
 def prepare_raw_complaint_data(): 
-        """ 
-                Slice relevant columns for country, sector, and issue
-                and returns master complaint csv for project purposes.
-        """
-        df = pd.read_csv('complaints.csv')
-        df = df[['Country', 'Sector/Industry (1)','Sector/Industry (2)',
-                 'Issue Raised (1)','Issue Raised (2)', 'Issue Raised (3)', 
-                 'Issue Raised (4)','Issue Raised (5)', 'Issue Raised (6)', 
-                 'Issue Raised (7)', 'Issue Raised (8)', 'Issue Raised (9)', 
-                 'Issue Raised (10)']]
-        return df.fillna('')
+		""" 
+				Slice relevant columns for country, sector, and issue
+				and returns master complaint csv for project purposes.
+		"""
+		df = pd.read_csv('complaints.csv')
+		df = df[['Country', 'Sector/Industry (1)','Sector/Industry (2)',
+				 'Issue Raised (1)','Issue Raised (2)', 'Issue Raised (3)', 
+				 'Issue Raised (4)','Issue Raised (5)', 'Issue Raised (6)', 
+				 'Issue Raised (7)', 'Issue Raised (8)', 'Issue Raised (9)', 
+				 'Issue Raised (10)']]
+		return df.fillna('')
 
 
 
@@ -105,8 +112,8 @@ def get_unique(column):
 	return list(set(u_column))
 
 def get_project_names(): 
-    ac = pd.read_csv('2016_17_complaints.csv')
-    return list(set(filter(None, list(ac['Project Name'].fillna('')))))
+	ac = pd.read_csv('2016_17_complaints.csv')
+	return list(set(filter(None, list(ac['Project Name'].fillna('')))))
 
 def remove_duplicate_projects(proj_names, wb_data):
 	"""
@@ -132,10 +139,11 @@ def combine_datasets(complaint_data, WB_data, numIssues):
 		Returns a shuffled combo of complaint_data and unique WB_data
 		Complaint Data: list of ([countries], [sectors], [issues]) tuples
 		WB Data:        list of (proj name, [countries], [sectors]) tuples
-	"""	
+		Ignores project name.
+	""" 
 	#print('orig 0:', complaint_data[0], 'orig 20:', complaint_data[20], 'orig 600:', complaint_data[600])
-	for a, b, c in WB_data:
-		complaint_data.append( (b, c, ['NONE']) )
+	for a, b, c, d in WB_data:
+		complaint_data.append( (b, c, ['NONE'], d) )
 	random.shuffle(complaint_data)
 	#print('new 0:', complaint_data[0], 'new 20:', complaint_data[20], 'new 600:', complaint_data[600])
 
@@ -158,8 +166,8 @@ def build_dict(filename):
 
 	your_list = your_list[1:]
 
-	dictionary = {}		# maps country to region
-	categories = []		# list of regions
+	dictionary = {}     # maps country to region
+	categories = []     # list of regions
 	category = ''
 
 	for item in your_list:
@@ -173,21 +181,6 @@ def build_dict(filename):
 
 	return categories, dictionary
 
-def featurize(inputList, featureVec):
-	"""
-	Converts a list of string inputs (sectors) into an extracted 
-	feature vector, based on the related feature vector.
-	Outputs a sparse feature vector.
-	"""
-	newVec = np.zeros(len(featureVec))
-
-	for s in inputList:
-		for i in range(len(featureVec)):
-			if s == featureVec[i]: 
-				newVec[i] = 1
-				break
-
-	return newVec.tolist()
 
 def featurize_complex(inputList, featureVec, dictionary):
 	"""
@@ -207,74 +200,98 @@ def featurize_complex(inputList, featureVec, dictionary):
 
 	return newVec.tolist()
 
-def featurize_issue(inputList, featureVec):
+def featurize_finance(investment, average_money):
+	"""
+	Converts a single monetary investment into an extracted feature vector,
+	where the amount is bucketed based on magnitude. 
+	"""
+
+	#newVec = [0, 0, 0, 0, 0, 0, 0, 0]
+	newVec = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+	if investment == 0: money = average_money
+	else: money = investment
+
+	if   money < 1*10**5: newVec[0]=1
+	elif money < 5*10**5: newVec[1]=1
+	elif money < 1*10**6: newVec[2]=1
+	elif money < 5*10**6: newVec[3]=1
+	elif money < 1*10**7: newVec[4]=1
+	elif money < 5*10**7: newVec[5]=1
+	elif money < 1*10**8: newVec[6]=1
+	elif money < 5*10**8: newVec[7]=1
+	elif money < 1*10**9: newVec[8]=1
+	else: newVec[9]=1
+
+	return newVec
+
+# def featurize_issue(inputList, featureVec):
+#     """
+#     Converts a list of string inputs (issues) into an extracted 
+#     feature vector, based on the related feature vector.
+#     If no issues, then the 'NONE' element is marked true.
+#     Outputs a sparse feature vector.
+#     """
+#     newVec = np.zeros(len(featureVec))
+#     numIssues = 0
+
+#     for s in inputList:
+#         for i in range(len(featureVec) - 1):
+#             if s == featureVec[i]: 
+#                 newVec[i] = 1
+#                 numIssues += 1
+#                 break
+
+#     if numIssues == 0: featureVec[-1] = 1
+#     return newVec.tolist()
+
+def featurize_issue(inputList, issueBuckets):
 	"""
 	Converts a list of string inputs (issues) into an extracted 
 	feature vector, based on the related feature vector.
 	If no issues, then the 'NONE' element is marked true.
 	Outputs a sparse feature vector.
 	"""
-	newVec = np.zeros(len(featureVec))
+	issueMap = { 
+		'Other retaliation (actual or feared)': 'Violence',
+		'Livelihoods': 'Community',
+		'Labor': 'Malpractice',
+		'Consultation and disclosure': 'Community',
+		'Property damage': 'Damages',
+		'Indigenous peoples': 'Community',
+		'Cultural heritage': 'Community',
+		'Personnel issues': 'Malpractice',
+		'Water': 'Environment',
+		'Other gender-related issues': 'Violence',
+		'Biodiversity': 'Environment',
+		'Procurement': 'Malpractice',
+		'Gender-based violence': 'Violence',
+		'Other community health and safety issues': 'Community',
+		'Pollution': 'Environment',
+		'Human rights': 'Violence',
+		"Violence against the community (by gov't and/or company)": 'Violence',
+		'Due diligence': 'Malpractice',
+		'Displacement (physical and/or economic)': 'Displacement',
+		'Other environmental': 'Environment',
+		'Corruption/fraud': 'Malpractice',
+		'Unknown': 'Unknown',
+		'Other': 'Other',
+		'NONE': 'NONE'
+	}
+
+	newVec = np.zeros(len(issueBuckets))
 	numIssues = 0
 
 	for s in inputList:
-		for i in range(len(featureVec) - 1):
-			if s == featureVec[i]: 
-				newVec[i] = 1
-				numIssues += 1
-				break
+		if s in issueMap:
+			for i in range(len(issueBuckets)):
+				if issueMap[s] == issueBuckets[i]: 
+					newVec[i] = 1
+					numIssues += 1
+					break
 
-	if numIssues == 0: featureVec[-1] = 1
+	if numIssues == 0: newVec[-1] = 1
 	return newVec.tolist()
-
-# def featurize_issue(inputList, featureVec):
-# 	"""
-# 	Converts a list of string inputs (issues) into an extracted 
-# 	feature vector, based on the related feature vector.
-# 	If no issues, then the 'NONE' element is marked true.
-# 	Outputs a sparse feature vector.
-# 	"""
-
-# 	issueDict = { 
-# 		'Other retaliation (actual or feared)': 'Violence',
-# 		'Livelihoods': 'Community',
-# 		'Labor': 'Malpractice',
-# 		'Consultation and disclosure': 'Malpractice',
-# 		'Property damage': 'Community',
-# 		'Indigenous peoples': 'Community',
-# 		'Cultural heritage': 'Community',
-# 		'Personnel issues': 'Malpractice',
-# 		'Water': 'Environmental',
-# 		'Other gender-related issues': 'Violence',
-# 		'Biodiversity': 'Environmental',
-# 		'Procurement': 'Malpractice',
-# 		'Gender-based violence': 'Violence',
-# 		'Other community health and safety issues': 'Community',
-# 		'Pollution': 'Environmental',
-# 		'Human rights': 'Violence',
-# 		"Violence against the community (by gov't and/or company)": 'Violence',
-# 		'Due diligence': 'Malpractice',
-# 		'Displacement (physical and/or economic)': 'Community',
-# 		'Other environmental': 'Envrionmental',
-# 		'Corruption/fraud': 'Malpractice',
-# 		'Other': 'Other',
-# 		'NONE': 'NONE'
-# 	}
-
-# 	newVec = np.zeros(len(featureVec))
-# 	numIssues = 0
-
-# 	for s in inputList:
-# 		if s in issueDict:
-# 			for i in range(len(featureVec)-1):
-# 				if issueDict[s] == featureVec[i]: 
-# 					newVec[i] = 1
-# 					numIssues += 1
-# 					break
-
-# 	if numIssues == 0: featureVec[-1] = 1
-# 	newVec = np.zeros(len(featureVec))
-# 	return newVec.tolist()
 
 
 ############################################################
@@ -287,51 +304,49 @@ def organize_data():
 
 	regions, regionDict = build_dict('countrylist.csv')
 	sectors, sectorDict = build_dict('sectorlist.csv')
-	#sectors = ['Agribusiness', 'Infrastructure', 'Conservation and environmental protection', 'Energy', 'Healthcare', 'Manufacturing', 'Community capacity and development', 'Forestry', 'Chemicals', 'Other', 'Regulatory Development', 'Land reform', 'Education', 'Extractives (oil/gas/mining)']
-	issues = ['Biodiversity', 'Consultation and disclosure', 'Corruption/fraud', 'Cultural heritage', 'Displacement (physical and/or economic)', 'Due diligence', 'Gender-based violence', 'Human rights', 'Indigenous peoples', 'Labor', 'Livelihoods', 'Other', 'Other community health and safety issues', 'Other environmental', 'Other gender-related issues', 'Other retaliation (actual or feared)', 'Personnel issues', 'Pollution', 'Procurement', 'Property damage', 'Unknown', "Violence against the community (by gov't and/or company)", 'Water', 'NONE']
-	# add no issues to feature vector: will have to create a specialized featurize function
-
-
+	#issues = ['Biodiversity', 'Consultation and disclosure', 'Corruption/fraud', 'Cultural heritage', 'Displacement (physical and/or economic)', 'Due diligence', 'Gender-based violence', 'Human rights', 'Indigenous peoples', 'Labor', 'Livelihoods', 'Other', 'Other community health and safety issues', 'Other environmental', 'Other gender-related issues', 'Other retaliation (actual or feared)', 'Personnel issues', 'Pollution', 'Procurement', 'Property damage', 'Unknown', "Violence against the community (by gov't and/or company)", 'Water', 'NONE']
+	issueBuckets = ['Community', 'Damages', 'Displacement', 'Environment', 'Human Rights', 'Malpractice', 'Other', 'Unknown', 'Violence', 'NONE']
+	
 	numRegions = len(regions)
 	numSectors = len(sectors)
-	numIssues = len(issues)
+	#numIssues = len(issues)
+	numIssues = len(issueBuckets)		# 10 ISSUES BUCKETS
+	numMoney = NUM_MONEY_BUCKETS
 
-	print('Num of Regions is ', numRegions)
-	print('Num of Sectors is ', numSectors)	
-	print('Num of Issues is ', numIssues)
-
-
-	# issueGroups = ['Community', 'Environmental', 'Malpractice', 'Other', 'NONE']	# DELETE LATER IF FAIL
-	# numGroups = len(issueGroups)
-	# print('Num of Issue Groups is ', numGroups)
-
-	complaint_df = prepare_raw_complaint_data()
-	complaint_clean_df = prepare_clean_complaint_data(complaint_df)
+	complaint_data = prepare_2016_17_data()
 	WB_df = prepare_raw_WB_project_data()
 	WB_clean_df = prepare_clean_WB_project_data(WB_df)
 	unique_WB_data = remove_duplicate_projects(get_project_names(), WB_clean_df)
-	total_dataset = combine_datasets(complaint_clean_df, unique_WB_data, numIssues)
+	total_dataset = combine_datasets(complaint_data, unique_WB_data, numIssues)
+	print('Example Complaint Data: ', complaint_data[2])
+	print('Example WB Data: ', unique_WB_data[2])
+	print('Example Total Data: ', total_dataset[2])
 
-	print('Length of raw complaint: ', len(complaint_df) )
+	sum_money = 0
+	for i in range(len(unique_WB_data)):
+		sum_money += unique_WB_data[i][3]
+	average_money = sum_money / len(unique_WB_data)
+
+
+	print('Length of raw complaint: ', len(complaint_data) )
 	print('Length of raw WB data: ', len(WB_df) )
 	print('Length of unique WB data: ', len(unique_WB_data) )
 	print('Length of total dataset: ', len(total_dataset) )
 
+
+
 	## Convert data
 	xlist = []
 	ylist = []
-	trainExamples = total_dataset
+	total_dataset = total_dataset
 	for i in range(len(total_dataset)):
-		x = featurize_complex(trainExamples[i][0], regions, regionDict)+featurize_complex(trainExamples[i][1], sectors, sectorDict)
-		#x = featurize_complex(trainExamples[i][0], regions, regionDict)+featurize(trainExamples[i][1], sectors)
-		y = featurize_issue(trainExamples[i][2], issues)
-		#y = featurize_issue(trainExamples[i][2], issueGroups)	# DELETE LATER IF FAIL
+		x = featurize_complex(total_dataset[i][0], regions, regionDict)+featurize_complex(total_dataset[i][1], sectors, sectorDict)+featurize_finance(total_dataset[i][3], average_money)
+		#y = featurize_issue(total_dataset[i][2], issues)
+		y = featurize_issue(total_dataset[i][2], issueBuckets)  # Sorted into 10 issues
 		xlist.append(x)
 		ylist.append(y)
 
-	return xlist, ylist, numRegions, numSectors, numIssues
-
-	#return xlist, ylist, numRegions, numSectors, numGroups
+	return xlist, ylist, numRegions, numSectors, numIssues, numMoney
 
 
 
