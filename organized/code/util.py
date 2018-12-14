@@ -72,18 +72,17 @@ def prepare_2016_17_data():
 	return clean_data
 
 def prepare_raw_complaint_data(): 
-		""" 
-				Slice relevant columns for country, sector, and issue
-				and returns master complaint csv for project purposes.
-		"""
-		df = pd.read_csv('complaints.csv')
-		df = df[['Country', 'Sector/Industry (1)','Sector/Industry (2)',
-				 'Issue Raised (1)','Issue Raised (2)', 'Issue Raised (3)', 
-				 'Issue Raised (4)','Issue Raised (5)', 'Issue Raised (6)', 
-				 'Issue Raised (7)', 'Issue Raised (8)', 'Issue Raised (9)', 
-				 'Issue Raised (10)']]
-		return df.fillna('')
-
+	""" 
+		Slice relevant columns for country, sector, and issue
+		and returns master complaint csv for project purposes.
+	"""
+	df = pd.read_csv('complaints.csv')
+	df = df[['Country', 'Sector/Industry (1)','Sector/Industry (2)',
+			 'Issue Raised (1)','Issue Raised (2)', 'Issue Raised (3)', 
+			 'Issue Raised (4)','Issue Raised (5)', 'Issue Raised (6)', 
+			 'Issue Raised (7)', 'Issue Raised (8)', 'Issue Raised (9)', 
+			 'Issue Raised (10)']]
+	return df.fillna('')
 
 
 def prepare_clean_complaint_data(df):
@@ -98,18 +97,6 @@ def prepare_clean_complaint_data(df):
 		clean_tuple = (x['Country'].split('|'), clean_sectors, clean_issues)
 		clean_data.append(clean_tuple)
 	return clean_data 
-
-def get_unique(column): 
-	""" 
-		Given a column from the master complaints df,
-		return a list of its unique values
-	"""
-	u_column = []
-	for x in column: 
-		if x == x:
-			for y in x.replace('Unknown', 'Other').replace('Extractives (oil, gas, mining)', 'Extractives (oil/gas/mining)').replace(', ', ',').split(','): 
-				u_column.append(y)
-	return list(set(u_column))
 
 def get_project_names(): 
 	ac = pd.read_csv('2016_17_complaints.csv')
@@ -141,12 +128,9 @@ def combine_datasets(complaint_data, WB_data, numIssues):
 		WB Data:        list of (proj name, [countries], [sectors]) tuples
 		Ignores project name.
 	""" 
-	#print('orig 0:', complaint_data[0], 'orig 20:', complaint_data[20], 'orig 600:', complaint_data[600])
 	for a, b, c, d in WB_data:
 		complaint_data.append( (b, c, ['NONE'], d) )
 	random.shuffle(complaint_data)
-	#print('new 0:', complaint_data[0], 'new 20:', complaint_data[20], 'new 600:', complaint_data[600])
-
 	return complaint_data
 
 ############################################################
@@ -225,30 +209,10 @@ def featurize_finance(investment, average_money):
 
 	return newVec
 
-# def featurize_issue(inputList, featureVec):
-#     """
-#     Converts a list of string inputs (issues) into an extracted 
-#     feature vector, based on the related feature vector.
-#     If no issues, then the 'NONE' element is marked true.
-#     Outputs a sparse feature vector.
-#     """
-#     newVec = np.zeros(len(featureVec))
-#     numIssues = 0
-
-#     for s in inputList:
-#         for i in range(len(featureVec) - 1):
-#             if s == featureVec[i]: 
-#                 newVec[i] = 1
-#                 numIssues += 1
-#                 break
-
-#     if numIssues == 0: featureVec[-1] = 1
-#     return newVec.tolist()
-
 def featurize_issue(inputList, issueBuckets):
 	"""
 	Converts a list of string inputs (issues) into an extracted 
-	feature vector, based on the related feature vector.
+	feature vector, sorted into issueBuckets.
 	If no issues, then the 'NONE' element is marked true.
 	Outputs a sparse feature vector.
 	"""
@@ -292,12 +256,6 @@ def featurize_issue(inputList, issueBuckets):
 	if numIssues == 0: newVec[-1] = 1
 	return newVec.tolist()
 
-def organize_issues(complaint_data): 
-	unique_issues = set()
-	for country, issue, sector, finance in complaint_data:
-		for i in issue:
-			unique_issues.add(i)
-
 ############################################################
 
 def organize_data():
@@ -313,7 +271,6 @@ def organize_data():
 	
 	numRegions = len(regions)
 	numSectors = len(sectors)
-	#numIssues = len(issues)
 	numIssues = len(issueBuckets)		# 10 ISSUES BUCKETS
 	numMoney = NUM_MONEY_BUCKETS
 
@@ -327,7 +284,6 @@ def organize_data():
 	print issueBuckets
 
 	complaint_data = prepare_2016_17_data()
-	organize_issues(complaint_data)
 	print('Len Complaint Data: ', len(complaint_data))
 
 	WB_df = prepare_raw_WB_project_data()
@@ -342,8 +298,6 @@ def organize_data():
 	for i in range(len(unique_WB_data)):
 		sum_money += unique_WB_data[i][3]
 	average_money = sum_money / len(unique_WB_data)
-
-	regionCounter = np.zeros(numRegions+numSectors+numMoney)
 	bucketCounter = np.zeros(len(issueBuckets))
 
 	## Convert data
@@ -355,7 +309,6 @@ def organize_data():
 		y = featurize_issue(total_dataset[i][2], issueBuckets)  # Sorted into 8 issues
 		xlist.append(x)
 		ylist.append(y)
-		regionCounter += x
 		bucketCounter += y
 		
 	print('Issue Distribution: ', bucketCounter, '\n Issue Buckets:', issueBuckets)

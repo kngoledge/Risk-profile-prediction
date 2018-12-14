@@ -99,17 +99,17 @@ def prepare_clean_complaint_data(df):
 		clean_data.append(clean_tuple)
 	return clean_data 
 
-def get_unique(column): 
-	""" 
-		Given a column from the master complaints df,
-		return a list of its unique values
-	"""
-	u_column = []
-	for x in column: 
-		if x == x:
-			for y in x.replace('Unknown', 'Other').replace('Extractives (oil, gas, mining)', 'Extractives (oil/gas/mining)').replace(', ', ',').split(','): 
-				u_column.append(y)
-	return list(set(u_column))
+# def get_unique(column): 
+# 	""" 
+# 		Given a column from the master complaints df,
+# 		return a list of its unique values
+# 	"""
+# 	u_column = []
+# 	for x in column: 
+# 		if x == x:
+# 			for y in x.replace('Unknown', 'Other').replace('Extractives (oil, gas, mining)', 'Extractives (oil/gas/mining)').replace(', ', ',').split(','): 
+# 				u_column.append(y)
+# 	return list(set(u_column))
 
 def get_project_names(): 
 	ac = pd.read_csv('2016_17_complaints.csv')
@@ -292,11 +292,11 @@ def featurize_issue(inputList, issueBuckets):
 	if numIssues == 0: newVec[-1] = 1
 	return newVec.tolist()
 
-def organize_issues(complaint_data): 
-	unique_issues = set()
-	for country, issue, sector, finance in complaint_data:
-		for i in issue:
-			unique_issues.add(i)
+# def organize_issues(complaint_data): 
+# 	unique_issues = set()
+# 	for country, issue, sector, finance in complaint_data:
+# 		for i in issue:
+# 			unique_issues.add(i)
 
 ############################################################
 
@@ -327,7 +327,7 @@ def organize_data():
 	print issueBuckets
 
 	complaint_data = prepare_2016_17_data()
-	organize_issues(complaint_data)
+	#organize_issues(complaint_data)
 	print('Len Complaint Data: ', len(complaint_data))
 
 	WB_df = prepare_raw_WB_project_data()
