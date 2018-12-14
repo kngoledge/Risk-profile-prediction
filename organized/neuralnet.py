@@ -28,7 +28,7 @@ def change_by_threshold(threshold, values_vector):
 ############################################################
 
 # Parameters
-numTrainers = 5000	# DECIDE SPLIT BETWEEN TRAINING AND TEST
+numTrainers = 6000	# DECIDE SPLIT BETWEEN TRAINING AND TEST
 xlist, ylist, numRegions, numSectors, numIssues, numMoney = util.organize_data()
 featureVec_size = numRegions + numSectors + numMoney
 final_dim = numIssues
@@ -58,7 +58,11 @@ history = model.fit(xtrain, ytrain, epochs=200, batch_size=batch_sz)
 
 # Time to test!
 score = model.evaluate(xtest, ytest, batch_size=batch_sz)
-#ypred = model.prediction(xtest)
+ypred = model.predict(xtest)
+
+for i in range(1000):
+  if ytest[i][-1] != 1.:
+    print ('\n TEST', i, ': ', xtest[i], ytest[i], ypred[i])
 
 """
 # For each class

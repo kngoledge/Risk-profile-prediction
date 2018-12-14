@@ -319,6 +319,13 @@ def organize_data():
 	numIssues = len(issueBuckets)		# 10 ISSUES BUCKETS
 	numMoney = NUM_MONEY_BUCKETS
 
+
+	print('#regions: ', numRegions)
+	print('#sectors: ', numSectors)
+	print sectors
+	print('#money: ', numMoney)
+	print('#issues: ', numIssues)
+
 	complaint_data = prepare_2016_17_data()
 	print('Length of raw complaint: ', len(complaint_data) )
 	organize_issues(complaint_data)
@@ -351,7 +358,8 @@ def organize_data():
 	print('Length of unique WB data: ', len(unique_WB_data) )
 	print('Length of total dataset: ', len(total_dataset) )
 
-
+	regionCounter = np.zeros(numRegions+numSectors+numMoney)
+	bucketCounter = np.zeros(len(issueBuckets))
 
 	## Convert data
 	xlist = []
@@ -362,7 +370,11 @@ def organize_data():
 		y = featurize_issue(total_dataset[i][2], issueBuckets)  # Sorted into 8 issues
 		xlist.append(x)
 		ylist.append(y)
-
+		regionCounter += x
+		bucketCounter += y
+		
+	print('Region COUNTER: ', regionCounter, '\n Region Buckets:', regions)
+	print('BUCKET COUNTER: ', bucketCounter, '\n Issue Buckets:', issueBuckets)
 	return xlist, ylist, numRegions, numSectors, numIssues, numMoney
 
 
