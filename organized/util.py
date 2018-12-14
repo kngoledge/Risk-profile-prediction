@@ -67,7 +67,7 @@ def prepare_2016_17_data():
 		issue = ([y.lstrip().rstrip() for y in str(x['Issues']).replace('Unknown', 'Other').replace('Extractives (oil, gas, mining)', 'Extractives (oil/gas/mining)').replace(', ', ',').replace(',', ';').split(';')])
 		sector = (x['Sector'].split(';'))
 		if country or finance or issue or sector:
-			clean_tuple = (country, issue, sector, finance)
+			clean_tuple = (country, sector, issue,finance)
 			clean_data.append(clean_tuple)
 	return clean_data
 
@@ -274,7 +274,6 @@ def featurize_issue(inputList, issueBuckets):
 		'Displacement (physical and/or economic)': 'Displacement',
 		'Other environmental': 'Environment',
 		'Corruption/fraud': 'Malpractice',
-		'Unknown': 'Unknown',
 		'Other': 'Other',
 		'NONE': 'NONE'
 	}
@@ -293,6 +292,13 @@ def featurize_issue(inputList, issueBuckets):
 	if numIssues == 0: newVec[-1] = 1
 	return newVec.tolist()
 
+def organize_issues(complaint_data): 
+	unique_issues = set()
+	for country, issue, sector, finance in complaint_data:
+		for i in issue:
+			unique_issues.add(i)
+	print ('# unique issues: ', len(unique_issues))
+	print unique_issues
 
 ############################################################
 
@@ -305,7 +311,7 @@ def organize_data():
 	regions, regionDict = build_dict('countrylist.csv')
 	sectors, sectorDict = build_dict('sectorlist.csv')
 	#issues = ['Biodiversity', 'Consultation and disclosure', 'Corruption/fraud', 'Cultural heritage', 'Displacement (physical and/or economic)', 'Due diligence', 'Gender-based violence', 'Human rights', 'Indigenous peoples', 'Labor', 'Livelihoods', 'Other', 'Other community health and safety issues', 'Other environmental', 'Other gender-related issues', 'Other retaliation (actual or feared)', 'Personnel issues', 'Pollution', 'Procurement', 'Property damage', 'Unknown', "Violence against the community (by gov't and/or company)", 'Water', 'NONE']
-	issueBuckets = ['Community', 'Damages', 'Displacement', 'Environment', 'Human Rights', 'Malpractice', 'Other', 'Unknown', 'Violence', 'NONE']
+	issueBuckets = ['Community', 'Damages', 'Displacement', 'Environment', 'Malpractice', 'Other', 'Violence', 'NONE']
 	
 	numRegions = len(regions)
 	numSectors = len(sectors)
@@ -314,11 +320,24 @@ def organize_data():
 	numMoney = NUM_MONEY_BUCKETS
 
 	complaint_data = prepare_2016_17_data()
+	print('Length of raw complaint: ', len(complaint_data) )
+	organize_issues(complaint_data)
+
+	print('Example Complaint Data: ', complaint_data[0])
+	print('Example Complaint Data: ', complaint_data[1])
+	print('Example Complaint Data: ', complaint_data[2])
+	print('Example Complaint Data: ', complaint_data[3])
+
 	WB_df = prepare_raw_WB_project_data()
 	WB_clean_df = prepare_clean_WB_project_data(WB_df)
 	unique_WB_data = remove_duplicate_projects(get_project_names(), WB_clean_df)
 	total_dataset = combine_datasets(complaint_data, unique_WB_data, numIssues)
-	print('Example Complaint Data: ', complaint_data[2])
+
+	print('Len Complaint: ', len(complaint_data))
+	print('Len WB Data: ', len(WB_clean_df))
+	print('Len Unique Data: ', len(unique_WB_data))
+	print('Len Total Data: ', len(total_dataset))
+
 	print('Example WB Data: ', unique_WB_data[2])
 	print('Example Total Data: ', total_dataset[2])
 
@@ -328,7 +347,6 @@ def organize_data():
 	average_money = sum_money / len(unique_WB_data)
 
 
-	print('Length of raw complaint: ', len(complaint_data) )
 	print('Length of raw WB data: ', len(WB_df) )
 	print('Length of unique WB data: ', len(unique_WB_data) )
 	print('Length of total dataset: ', len(total_dataset) )
@@ -341,8 +359,7 @@ def organize_data():
 	total_dataset = total_dataset
 	for i in range(len(total_dataset)):
 		x = featurize_complex(total_dataset[i][0], regions, regionDict)+featurize_complex(total_dataset[i][1], sectors, sectorDict)+featurize_finance(total_dataset[i][3], average_money)
-		#y = featurize_issue(total_dataset[i][2], issues)
-		y = featurize_issue(total_dataset[i][2], issueBuckets)  # Sorted into 10 issues
+		y = featurize_issue(total_dataset[i][2], issueBuckets)  # Sorted into 8 issues
 		xlist.append(x)
 		ylist.append(y)
 
