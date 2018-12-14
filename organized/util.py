@@ -297,8 +297,6 @@ def organize_issues(complaint_data):
 	for country, issue, sector, finance in complaint_data:
 		for i in issue:
 			unique_issues.add(i)
-	print ('# unique issues: ', len(unique_issues))
-	print unique_issues
 
 ############################################################
 
@@ -321,42 +319,29 @@ def organize_data():
 
 
 	print('#regions: ', numRegions)
+	print regions
 	print('#sectors: ', numSectors)
 	print sectors
 	print('#money: ', numMoney)
 	print('#issues: ', numIssues)
+	print issueBuckets
 
 	complaint_data = prepare_2016_17_data()
-	print('Length of raw complaint: ', len(complaint_data) )
 	organize_issues(complaint_data)
-
-	print('Example Complaint Data: ', complaint_data[0])
-	print('Example Complaint Data: ', complaint_data[1])
-	print('Example Complaint Data: ', complaint_data[2])
-	print('Example Complaint Data: ', complaint_data[3])
+	print('Len Complaint Data: ', len(complaint_data))
 
 	WB_df = prepare_raw_WB_project_data()
 	WB_clean_df = prepare_clean_WB_project_data(WB_df)
 	unique_WB_data = remove_duplicate_projects(get_project_names(), WB_clean_df)
 	total_dataset = combine_datasets(complaint_data, unique_WB_data, numIssues)
 
-	print('Len Complaint: ', len(complaint_data))
-	print('Len WB Data: ', len(WB_clean_df))
-	print('Len Unique Data: ', len(unique_WB_data))
+	print('Len WB Unique Data: ', len(unique_WB_data))
 	print('Len Total Data: ', len(total_dataset))
-
-	print('Example WB Data: ', unique_WB_data[2])
-	print('Example Total Data: ', total_dataset[2])
 
 	sum_money = 0
 	for i in range(len(unique_WB_data)):
 		sum_money += unique_WB_data[i][3]
 	average_money = sum_money / len(unique_WB_data)
-
-
-	print('Length of raw WB data: ', len(WB_df) )
-	print('Length of unique WB data: ', len(unique_WB_data) )
-	print('Length of total dataset: ', len(total_dataset) )
 
 	regionCounter = np.zeros(numRegions+numSectors+numMoney)
 	bucketCounter = np.zeros(len(issueBuckets))
@@ -373,8 +358,7 @@ def organize_data():
 		regionCounter += x
 		bucketCounter += y
 		
-	print('Region COUNTER: ', regionCounter, '\n Region Buckets:', regions)
-	print('BUCKET COUNTER: ', bucketCounter, '\n Issue Buckets:', issueBuckets)
+	print('Issue Distribution: ', bucketCounter, '\n Issue Buckets:', issueBuckets)
 	return xlist, ylist, numRegions, numSectors, numIssues, numMoney
 
 

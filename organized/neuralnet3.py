@@ -119,7 +119,7 @@ print('Test accuracy:', score[1])
 all_featurevecs = xlist
 all_labels = ylist
 summaries = cross_validate(model, all_featurevecs, all_labels, 3)
-evaluate_summaries(summaries)
+#evaluate_summaries(summaries)
 
 ############################################################
 """

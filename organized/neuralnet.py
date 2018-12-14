@@ -60,38 +60,211 @@ history = model.fit(xtrain, ytrain, epochs=200, batch_size=batch_sz)
 score = model.evaluate(xtest, ytest, batch_size=batch_sz)
 ypred = model.predict(xtest)
 
-for i in range(1000):
+sum_x0test = np.zeros(featureVec_size)
+sum_y0test = np.zeros(numIssues)
+sum_y0pred = np.zeros(numIssues)
+sum_x1test = np.zeros(featureVec_size)
+sum_y1test = np.zeros(numIssues)
+sum_y1pred = np.zeros(numIssues)
+sum_x2test = np.zeros(featureVec_size)
+sum_y2test = np.zeros(numIssues)
+sum_y2pred = np.zeros(numIssues)
+sum_x3test = np.zeros(featureVec_size)
+sum_y3test = np.zeros(numIssues)
+sum_y3pred = np.zeros(numIssues)
+sum_x4test = np.zeros(featureVec_size)
+sum_y4test = np.zeros(numIssues)
+sum_y4pred = np.zeros(numIssues)
+sum_x5test = np.zeros(featureVec_size)
+sum_y5test = np.zeros(numIssues)
+sum_y5pred = np.zeros(numIssues)
+sum_x6test = np.zeros(featureVec_size)
+sum_y6test = np.zeros(numIssues)
+sum_y6pred = np.zeros(numIssues)
+
+for i in range(2500):
   if ytest[i][-1] != 1.:
-    print ('\n TEST', i, ': ', xtest[i], ytest[i], ypred[i])
+    #print ('\n TEST', i, ': ', xtest[i], ytest[i], ypred[i])
 
-"""
-# For each class
-precision = dict()
-recall = dict()
-average_precision = dict()
-for i in range(23):
-    precision[i], recall[i], _ = precision_recall_curve(ytest[:, i],
-                                                        ypred[:, i])
-    average_precision[i] = average_precision_score(ytest[:, i], ypred[:, i])
 
-# A "micro-average": quantifying score on all classes jointly
-precision["micro"], recall["micro"], _ = precision_recall_curve(ytest.ravel(),
-    ypred.ravel())
-average_precision["micro"] = average_precision_score(ytest, ypred,
-                                                     average="micro")
-print('Average precision score, micro-averaged over all classes: {0:0.2f}'
-      .format(average_precision["micro"]))
+    if ytest[i][0] == 1:
+      sum_x0test += xtest[i]
+      sum_y0test += ytest[i]
+      sum_y0pred += ypred[i]
 
-## TO DO: get an average for micro recall 
-"""
+    if ytest[i][1] == 1:
+      sum_x1test += xtest[i]
+      sum_y1test += ytest[i]
+      sum_y1pred += ypred[i]
 
+    if ytest[i][2] == 1:
+      sum_x2test += xtest[i]
+      sum_y2test += ytest[i]
+      sum_y2pred += ypred[i]
+
+    if ytest[i][3] == 1:
+      sum_x3test += xtest[i]
+      sum_y3test += ytest[i]
+      sum_y3pred += ypred[i]
+
+    if ytest[i][4] == 1:
+      sum_x4test += xtest[i]
+      sum_y4test += ytest[i]
+      sum_y4pred += ypred[i]
+
+    if ytest[i][5] == 1:
+      sum_x5test += xtest[i]
+      sum_y5test += ytest[i]
+      sum_y5pred += ypred[i]
+
+    if ytest[i][6] == 1:
+      sum_x6test += xtest[i]
+      sum_y6test += ytest[i]
+      sum_y6pred += ypred[i]
+
+#['Community', 'Damages', 'Displacement', 'Environment', 'Malpractice', 'Other', 'Violence', 'NONE']
+
+print "BASED ON EXPECTED"
+print('COMMUNITY')
+print('sum_xtest = ', sum_x0test)
+print('sum_ytest = ', sum_y0test)
+print('sum_ypred = ', sum_y0pred)
+
+print('DAMAGES')
+print('sum_xtest = ', sum_x1test)
+print('sum_ytest = ', sum_y1test)
+print('sum_ypred = ', sum_y1pred)
+
+print('DISPLACEMENT')
+print('sum_xtest = ', sum_x2test)
+print('sum_ytest = ', sum_y2test)
+print('sum_ypred = ', sum_y2pred)
+
+print('ENVIRONMENT')
+print('sum_xtest = ', sum_x3test)
+print('sum_ytest = ', sum_y3test)
+print('sum_ypred = ', sum_y3pred)
+
+print('MALPRACTICE')
+print('sum_xtest = ', sum_x4test)
+print('sum_ytest = ', sum_y4test)
+print('sum_ypred = ', sum_y4pred)
+
+print('OTHER')
+print('sum_xtest = ', sum_x5test)
+print('sum_ytest = ', sum_y5test)
+print('sum_ypred = ', sum_y5pred)
+
+print('VIOLENCE')
+print('sum_xtest = ', sum_x6test)
+print('sum_ytest = ', sum_y6test)
+print('sum_ypred = ', sum_y6pred)
+
+
+sum_x0test = np.zeros(featureVec_size)
+sum_y0test = np.zeros(numIssues)
+sum_y0pred = np.zeros(numIssues)
+sum_x1test = np.zeros(featureVec_size)
+sum_y1test = np.zeros(numIssues)
+sum_y1pred = np.zeros(numIssues)
+sum_x2test = np.zeros(featureVec_size)
+sum_y2test = np.zeros(numIssues)
+sum_y2pred = np.zeros(numIssues)
+sum_x3test = np.zeros(featureVec_size)
+sum_y3test = np.zeros(numIssues)
+sum_y3pred = np.zeros(numIssues)
+sum_x4test = np.zeros(featureVec_size)
+sum_y4test = np.zeros(numIssues)
+sum_y4pred = np.zeros(numIssues)
+sum_x5test = np.zeros(featureVec_size)
+sum_y5test = np.zeros(numIssues)
+sum_y5pred = np.zeros(numIssues)
+sum_x6test = np.zeros(featureVec_size)
+sum_y6test = np.zeros(numIssues)
+sum_y6pred = np.zeros(numIssues)
+
+prob = 0.1
+
+for i in range(2500):
+  if ytest[i][-1] != 1.:
+    #print ('\n TEST', i, ': ', xtest[i], ytest[i], ypred[i])
+
+
+    if ypred[i][0] > prob:
+      sum_x0test += xtest[i]
+      sum_y0test += ytest[i]
+      sum_y0pred += ypred[i]
+
+    if ypred[i][1] > prob:
+      sum_x1test += xtest[i]
+      sum_y1test += ytest[i]
+      sum_y1pred += ypred[i]
+
+    if ypred[i][2] > prob:
+      sum_x2test += xtest[i]
+      sum_y2test += ytest[i]
+      sum_y2pred += ypred[i]
+
+    if ypred[i][3] > prob:
+      sum_x3test += xtest[i]
+      sum_y3test += ytest[i]
+      sum_y3pred += ypred[i]
+
+    if ypred[i][4] > prob:
+      sum_x4test += xtest[i]
+      sum_y4test += ytest[i]
+      sum_y4pred += ypred[i]
+
+    if ypred[i][5] > prob:
+      sum_x5test += xtest[i]
+      sum_y5test += ytest[i]
+      sum_y5pred += ypred[i]
+
+    if ypred[i][6] > prob:
+      sum_x6test += xtest[i]
+      sum_y6test += ytest[i]
+      sum_y6pred += ypred[i]
+
+#['Community', 'Damages', 'Displacement', 'Environment', 'Malpractice', 'Other', 'Violence', 'NONE']
+
+print "BASED ON PREDICTIONS"
+print('COMMUNITY')
+print('sum_xtest = ', sum_x0test)
+print('sum_ytest = ', sum_y0test)
+print('sum_ypred = ', sum_y0pred)
+
+print('DAMAGES')
+print('sum_xtest = ', sum_x1test)
+print('sum_ytest = ', sum_y1test)
+print('sum_ypred = ', sum_y1pred)
+
+print('DISPLACEMENT')
+print('sum_xtest = ', sum_x2test)
+print('sum_ytest = ', sum_y2test)
+print('sum_ypred = ', sum_y2pred)
+
+print('ENVIRONMENT')
+print('sum_xtest = ', sum_x3test)
+print('sum_ytest = ', sum_y3test)
+print('sum_ypred = ', sum_y3pred)
+
+print('MALPRACTICE')
+print('sum_xtest = ', sum_x4test)
+print('sum_ytest = ', sum_y4test)
+print('sum_ypred = ', sum_y4pred)
+
+print('OTHER')
+print('sum_xtest = ', sum_x5test)
+print('sum_ytest = ', sum_y5test)
+print('sum_ypred = ', sum_y5pred)
+
+print('VIOLENCE')
+print('sum_xtest = ', sum_x6test)
+print('sum_ytest = ', sum_y6test)
+print('sum_ypred = ', sum_y6pred)
+
+
+# Results
 print "\nCompiled! Here are your results..."
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
-
-############################################################
-"""
-	NOTES: 
-	- Consider shrinking the number of issues (from 15 to 4) - leads to acc of 100%... too high
-
-"""

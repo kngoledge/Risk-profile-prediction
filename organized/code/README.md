@@ -1,0 +1,11 @@
+README
+
+The purpose of this project is to develop a prediction system for issues of a potential investment for a multilateral-finance project; this machine learning algorithm reads IFI-financed project data of sector, region, and monetary investment, and then outputs risk profile predictions on the directional change of issues given the profiles of similar investments and existing project complaint data. 
+
+The input is a vector containing the concatenation of the following information: one hot encoding of regions (size 23), one hot encoding of sectors (size 13), and bucketed values for monetary investment amount (size 10). The output is a vector of floats (size 8) where each value represents the probability of an issues occurrence, and where the index of each value corresponds with the name of an issue/risk that could arise from the investment of such a project.
+
+Run neuralnet.py to build the neural network. Our neural network is implemented with Keras. The program prints out information about the neural network such as accuracy and loss. Uncomment out the Print section within the code in order to see a list of projects that have at least one issue. 
+
+Our main code (neuralnet.py) imports util.py, which handles all preprocessing of raw project data into featurized vectors. The project data is contained in both 2016_17_complaints.csv and WBsubset.csv. All projects in the complaint file have documented issues. All World Bank projects in WBsubset that are not already included in the complaint file are assumed to have NO issues. Additional information such as country-to-region mapping and sector-to-sector bucket mapping is contained in countrylist.csv and sectorlist.csv, respectively. All of these data files are used in util.py for preprocessing and are contained in data.zip. 
+
+Run kfold.py to build a neural network (same as neuralnet.py) and also perform k-fold cross validation to evaluate the model. Validation is much slower, so we decided to separate neuralnet.py and kfold.py. 
